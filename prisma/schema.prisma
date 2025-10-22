@@ -1,0 +1,135 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String       @id @default(cuid())
+  email       String       @unique
+  password    String
+  name        String
+  role        Role
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+  inspeksi    Inspeksi[]   @relation("PetugasInspeksi")
+
+  @@map("users")
+}
+
+model Inspeksi {
+  id                    String            @id @default(cuid())
+  kategoriKendaraan     KategoriKendaraan
+  nomorKendaraan        String            // Plat Nomor dari form
+  lokasiInspeksi        String
+  tanggalInspeksi       DateTime          @default(now())
+  
+  // Petugas 1 - ACTUAL dari form
+  namaPetugas           String
+  nipPetugas            String
+  
+  // Petugas 2 - ACTUAL dari form (untuk kategori yang butuh 2 petugas)
+  namaPetugas2          String?
+  nipPetugas2           String?
+  
+  // Dokumen STNK - ACTUAL dari form
+  nomorSTNK             String?
+  masaBerlakuSTNK       DateTime?
+  fotoSTNK              String?           @db.Text  // Base64 image
+  
+  // Dokumen KIR - ACTUAL dari form
+  nomorKIR              String?
+  masaBerlakuKIR        DateTime?
+  fotoKIR               String?           @db.Text  // Base64 image
+  
+  // SIM Petugas 1 - ACTUAL dari form
+  masaBerlakuSIMPetugas1 DateTime?
+  fotoSIMPetugas1       String?           @db.Text  // Base64 image
+  
+  // SIM Petugas 2 - ACTUAL dari form
+  masaBerlakuSIMPetugas2 DateTime?
+  fotoSIMPetugas2       String?           @db.Text  // Base64 image
+  
+  // Service Terakhir - ACTUAL dari form
+  tanggalService        DateTime?
+  fotoService           String?           @db.Text  // Base64 image
+  
+  // BBM - ACTUAL dari form
+  jumlahBBM             String?           // Jumlah BBM dalam BAR
+  fotoBBM               String?           @db.Text  // Base64 image
+  
+  // Data khusus per kategori (JSON)
+  dataKhusus            Json?             // TTD, kelengkapan detail, latitude, longitude, dll
+  
+  // Kelengkapan checklist (JSON)
+  kelengkapanKendaraan  Json?             // Checklist kelengkapan
+  
+  // Catatan
+  catatan               String?           @db.Text
+  
+  // Status
+  status                StatusInspeksi    @default(DRAFT)
+  
+  // Approval Manager Traffic
+  needsApproval         Boolean           @default(true)
+  approvedByTraffic     String?           // User ID Manager Traffic
+  approvedAtTraffic     DateTime?
+  ttdManagerTraffic     String?           @db.Text  // Base64 signature
+  
+  // Approval Manager Operational
+  approvedByOperational String?           // User ID Manager Operational
+  approvedAtOperational DateTime?
+  ttdManagerOperasional String?           @db.Text  // Base64 signature
+  
+  // Rejection
+  rejectionNote         String?           @db.Text
+  rejectedBy            String?           // "TRAFFIC" atau "OPERATIONAL"
+  rejectedAt            DateTime?
+  
+  // PDF Generation
+  pdfUrl                String?           // Path to generated PDF
+  pdfGeneratedAt        DateTime?
+  
+  // Relations
+  petugasId             String
+  petugas               User              @relation("PetugasInspeksi", fields: [petugasId], references: [id])
+  
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+
+  @@index([status])
+  @@index([petugasId])
+  @@index([createdAt])
+  @@index([kategoriKendaraan])
+  @@index([tanggalInspeksi])
+  @@index([petugasId, status])
+  @@index([status, createdAt])
+  @@map("inspeksi")
+}
+
+enum Role {
+  MANAGER_TRAFFIC
+  MANAGER_OPERATIONAL
+  PETUGAS_LAPANGAN
+}
+
+enum KategoriKendaraan {
+  PLAZA
+  DEREK
+  KAMTIB
+  RESCUE
+}
+
+enum StatusInspeksi {
+  DRAFT
+  SUBMITTED
+  APPROVED_BY_TRAFFIC
+  APPROVED_BY_OPERATIONAL
+  REJECTED
+}
