@@ -61,7 +61,7 @@ export default function InspeksiRescuePage() {
   const [hasSignature, setHasSignature] = useState(false);
 
   const [formData, setFormData] = useState<InspeksiForm>({
-    namaPetugas1: session?.user?.name || "",
+    namaPetugas1: "",
     nipPetugas1: "",
     namaPetugas2: "",
     nipPetugas2: "",
@@ -124,33 +124,18 @@ export default function InspeksiRescuePage() {
     const timer = setTimeout(async () => {
       if (formData.namaPetugas1 || formData.platNomor || currentStep > 1) {
         try {
+          // Save form data WITHOUT base64 images to avoid localStorage quota exceeded
           const formDataToSave = { ...formData };
-          
-          // Convert File objects to base64 strings before saving
-          if (formData.fotoSTNK && typeof formData.fotoSTNK !== 'string' && formData.fotoSTNK instanceof File) {
-            formDataToSave.fotoSTNK = await uploadFile(formData.fotoSTNK);
-          }
-          if (formData.fotoKIR && typeof formData.fotoKIR !== 'string' && formData.fotoKIR instanceof File) {
-            formDataToSave.fotoKIR = await uploadFile(formData.fotoKIR);
-          }
-          if (formData.fotoSIMPetugas1 && typeof formData.fotoSIMPetugas1 !== 'string' && formData.fotoSIMPetugas1 instanceof File) {
-            formDataToSave.fotoSIMPetugas1 = await uploadFile(formData.fotoSIMPetugas1);
-          }
-          if (formData.fotoService && typeof formData.fotoService !== 'string' && formData.fotoService instanceof File) {
-            formDataToSave.fotoService = await uploadFile(formData.fotoService);
-          }
-          if (formData.fotoBBM && typeof formData.fotoBBM !== 'string' && formData.fotoBBM instanceof File) {
-            formDataToSave.fotoBBM = await uploadFile(formData.fotoBBM);
-          }
-          if (formData.fotoAsuransi && typeof formData.fotoAsuransi !== 'string' && formData.fotoAsuransi instanceof File) {
-            formDataToSave.fotoAsuransi = await uploadFile(formData.fotoAsuransi);
-          }
-          if (formData.fotoKendaraan && typeof formData.fotoKendaraan !== 'string' && formData.fotoKendaraan instanceof File) {
-            formDataToSave.fotoKendaraan = await uploadFile(formData.fotoKendaraan);
-          }
-          if (formData.fotoInterior && typeof formData.fotoInterior !== 'string' && formData.fotoInterior instanceof File) {
-            formDataToSave.fotoInterior = await uploadFile(formData.fotoInterior);
-          }
+          // Remove base64 images from draft (they're too large for localStorage)
+          formDataToSave.fotoSTNK = null;
+          formDataToSave.fotoKIR = null;
+          formDataToSave.fotoSIMPetugas1 = null;
+          formDataToSave.fotoService = null;
+          formDataToSave.fotoBBM = null;
+          formDataToSave.fotoAsuransi = null;
+          formDataToSave.fotoKendaraan = null;
+          formDataToSave.fotoInterior = null;
+          formDataToSave.ttdPetugas1 = "";
 
           const draftData = { formData: formDataToSave, currentStep, timestamp: new Date().toISOString() };
           localStorage.setItem('draft_rescue', JSON.stringify(draftData));
@@ -180,16 +165,11 @@ export default function InspeksiRescuePage() {
   ];
 
   const kelengkapanKendaraanUmum = [
-    "STNK (Asli & Fotokopi)",
-    "KIR Kendaraan",
-    "Surat Izin Operasional",
-    "Buku Panduan Kendaraan",
     "Ban Serep",
     "Dongkrak & Kunci Roda",
     "Segitiga Pengaman",
     "Kotak P3K",
-    "Toolkit/Perkakas Dasar",
-    "Dokumentasi Inspeksi Sebelumnya",
+    "Toolkit/Perkakas Dasar"
   ];
 
   const handleInputChange = (
@@ -337,11 +317,11 @@ export default function InspeksiRescuePage() {
 
   const uploadFile = async (file: File | string, customFileName?: string): Promise<string> => {
     try {
-      // Upload to MinIO and return URL
+      // Process file and return base64 string for database storage
       return await uploadFileToMinio(file, customFileName);
     } catch (error) {
-      console.error('Error uploading file:', error);
-      // Fallback: convert to base64 if MinIO upload fails
+      console.error('Error processing file:', error);
+      // Fallback: convert to base64
       if (typeof file === 'string') {
         return file;
       }
@@ -383,7 +363,7 @@ export default function InspeksiRescuePage() {
       const fotoKendaraanBase64 = formData.fotoKendaraan ? await uploadFile(formData.fotoKendaraan) : null;
       const fotoInteriorBase64 = formData.fotoInterior ? await uploadFile(formData.fotoInterior) : null;
       
-      // Upload signature to MinIO
+      // Process signature for database storage
       const ttdPetugas1Uploaded = formData.ttdPetugas1 ? await uploadSignatureToMinio(formData.ttdPetugas1, 'ttd-petugas1-rescue') : null;
 
       const payload = {
@@ -593,7 +573,19 @@ export default function InspeksiRescuePage() {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Foto STNK *</label>
-          <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) setFormData((prev) => ({ ...prev, fotoSTNK: file })); }} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black" />
+          <div className="flex gap-2">
+            <label className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-center cursor-pointer flex items-center justify-center gap-2 text-sm">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              Pilih File
+              <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => setFormData((prev) => ({ ...prev, fotoSTNK: reader.result as string })); reader.readAsDataURL(file); } }} className="hidden" />
+            </label>
+            <label className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-center cursor-pointer flex items-center justify-center gap-2 text-sm">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              Kamera
+              <input type="file" accept="image/*" capture="environment" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => setFormData((prev) => ({ ...prev, fotoSTNK: reader.result as string })); reader.readAsDataURL(file); } }} className="hidden" />
+            </label>
+          </div>
+          {formData.fotoSTNK && typeof formData.fotoSTNK === 'string' && <img src={formData.fotoSTNK} alt="Preview STNK" className="mt-2 w-full h-32 object-cover rounded border" />}
         </div>
       </div>
 
@@ -607,7 +599,19 @@ export default function InspeksiRescuePage() {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Foto KIR *</label>
-          <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) setFormData((prev) => ({ ...prev, fotoKIR: file })); }} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-black" />
+          <div className="flex gap-2">
+            <label className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-center cursor-pointer flex items-center justify-center gap-2 text-sm">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              Pilih File
+              <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => setFormData((prev) => ({ ...prev, fotoKIR: reader.result as string })); reader.readAsDataURL(file); } }} className="hidden" />
+            </label>
+            <label className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-center cursor-pointer flex items-center justify-center gap-2 text-sm">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              Kamera
+              <input type="file" accept="image/*" capture="environment" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => setFormData((prev) => ({ ...prev, fotoKIR: reader.result as string })); reader.readAsDataURL(file); } }} className="hidden" />
+            </label>
+          </div>
+          {formData.fotoKIR && typeof formData.fotoKIR === 'string' && <img src={formData.fotoKIR} alt="Preview KIR" className="mt-2 w-full h-32 object-cover rounded border" />}
         </div>
       </div>
 
@@ -621,7 +625,19 @@ export default function InspeksiRescuePage() {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Foto SIM *</label>
-          <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) setFormData((prev) => ({ ...prev, fotoSIMPetugas1: file })); }} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-black" />
+          <div className="flex gap-2">
+            <label className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-center cursor-pointer flex items-center justify-center gap-2 text-sm">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              Pilih File
+              <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => setFormData((prev) => ({ ...prev, fotoSIMPetugas1: reader.result as string })); reader.readAsDataURL(file); } }} className="hidden" />
+            </label>
+            <label className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-center cursor-pointer flex items-center justify-center gap-2 text-sm">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              Kamera
+              <input type="file" accept="image/*" capture="environment" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => setFormData((prev) => ({ ...prev, fotoSIMPetugas1: reader.result as string })); reader.readAsDataURL(file); } }} className="hidden" />
+            </label>
+          </div>
+          {formData.fotoSIMPetugas1 && typeof formData.fotoSIMPetugas1 === 'string' && <img src={formData.fotoSIMPetugas1} alt="Preview SIM" className="mt-2 w-full h-32 object-cover rounded border" />}
         </div>
       </div>
 
@@ -635,7 +651,19 @@ export default function InspeksiRescuePage() {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Foto Bukti Service *</label>
-          <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) setFormData((prev) => ({ ...prev, fotoService: file })); }} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-black" />
+          <div className="flex gap-2">
+            <label className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-center cursor-pointer flex items-center justify-center gap-2 text-sm">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              Pilih File
+              <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => setFormData((prev) => ({ ...prev, fotoService: reader.result as string })); reader.readAsDataURL(file); } }} className="hidden" />
+            </label>
+            <label className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-center cursor-pointer flex items-center justify-center gap-2 text-sm">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              Kamera
+              <input type="file" accept="image/*" capture="environment" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => setFormData((prev) => ({ ...prev, fotoService: reader.result as string })); reader.readAsDataURL(file); } }} className="hidden" />
+            </label>
+          </div>
+          {formData.fotoService && typeof formData.fotoService === 'string' && <img src={formData.fotoService} alt="Preview Service" className="mt-2 w-full h-32 object-cover rounded border" />}
         </div>
       </div>
 
@@ -660,7 +688,19 @@ export default function InspeksiRescuePage() {
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Foto Bukti BBM *</label>
-          <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) setFormData((prev) => ({ ...prev, fotoBBM: file })); }} className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-black" />
+          <div className="flex gap-2">
+            <label className="flex-1 px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition text-center cursor-pointer flex items-center justify-center gap-2 text-sm">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+              Pilih File
+              <input type="file" accept="image/*" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => setFormData((prev) => ({ ...prev, fotoBBM: reader.result as string })); reader.readAsDataURL(file); } }} className="hidden" />
+            </label>
+            <label className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition text-center cursor-pointer flex items-center justify-center gap-2 text-sm">
+              <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 13a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+              Kamera
+              <input type="file" accept="image/*" capture="environment" onChange={(e) => { const file = e.target.files?.[0]; if (file) { const reader = new FileReader(); reader.onloadend = () => setFormData((prev) => ({ ...prev, fotoBBM: reader.result as string })); reader.readAsDataURL(file); } }} className="hidden" />
+            </label>
+          </div>
+          {formData.fotoBBM && typeof formData.fotoBBM === 'string' && <img src={formData.fotoBBM} alt="Preview BBM" className="mt-2 w-full h-32 object-cover rounded border" />}
           <p className="text-xs text-gray-500 mt-1">* Upload foto bukti pengisian BBM terakhir</p>
         </div>
       </div>

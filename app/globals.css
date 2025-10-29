@@ -50,6 +50,21 @@ body {
   }
 }
 
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out;
+}
+
 .animate-slide-in {
   animation: slide-in 0.3s ease-out;
 }
@@ -60,4 +75,135 @@ body {
 
 .animate-scale-in {
   animation: scale-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+/* Print styles - hide everything except preview */
+@media print {
+  @page {
+    size: A4;
+    margin: 5mm;
+  }
+  
+  body * {
+    visibility: hidden;
+  }
+  
+  #preview-content,
+  #preview-content * {
+    visibility: visible;
+  }
+  
+  #preview-content {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 100%;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+  
+  /* Compact spacing untuk fit di 1 page */
+  #preview-content .p-8 {
+    padding: 0.85rem !important;
+  }
+  
+  #preview-content .p-6 {
+    padding: 0.7rem !important;
+  }
+  
+  #preview-content .p-4 {
+    padding: 0.5rem !important;
+  }
+  
+  #preview-content .p-3 {
+    padding: 0.4rem !important;
+  }
+  
+  #preview-content .p-2 {
+    padding: 0.3rem !important;
+  }
+  
+  #preview-content .mb-6 {
+    margin-bottom: 0.5rem !important;
+  }
+  
+  #preview-content .mb-8 {
+    margin-bottom: 0.5rem !important;
+  }
+  
+  #preview-content .gap-6 {
+    gap: 0.7rem !important;
+  }
+  
+  #preview-content table {
+    font-size: 9.5px !important;
+    line-height: 1.3 !important;
+  }
+  
+  #preview-content th,
+  #preview-content td {
+    padding: 3.5px 5px !important;
+  }
+  
+  #preview-content img.max-h-16,
+  #preview-content img.max-h-14 {
+    max-height: 48px !important;
+  }
+  
+  #preview-content .text-2xl {
+    font-size: 17px !important;
+    line-height: 1.3 !important;
+  }
+  
+  #preview-content .text-xl {
+    font-size: 14px !important;
+  }
+  
+  #preview-content .text-lg {
+    font-size: 12px !important;
+  }
+  
+  #preview-content .text-sm {
+    font-size: 10px !important;
+  }
+  
+  #preview-content .text-xs {
+    font-size: 9px !important;
+  }
+  
+  #preview-content .min-h-\[60px\] {
+    min-height: 48px !important;
+  }
+  
+  /* FORCE page break SEBELUM lampiran foto - HALAMAN 2+ */
+  .lampiran-foto-section {
+    page-break-before: always !important;
+    break-before: page !important;
+  }
+  
+  /* Perkecil foto lampiran biar 3 pas per halaman */
+  .lampiran-foto-section img {
+    max-height: 220px !important;
+    object-fit: contain !important;
+  }
+  
+  .lampiran-foto-section .border-2 {
+    padding: 0.5rem !important;
+  }
+  
+  .lampiran-foto-section .gap-6 {
+    gap: 0.5rem !important;
+  }
+  
+  /* Style untuk lampiran foto - 3 foto per halaman */
+  #preview-content .grid-cols-1 > div {
+    page-break-inside: avoid !important;
+    break-inside: avoid !important;
+  }
+  
+  /* Force page break setiap 3 foto */
+  #preview-content .grid-cols-1 > div:nth-child(3n) {
+    page-break-after: always !important;
+    break-after: page !important;
+  }
 }

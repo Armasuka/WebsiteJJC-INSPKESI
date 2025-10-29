@@ -1,7 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { getServerSession } from 'next-auth';
 import { authOptions } from '@/lib/auth';
-import { uploadToMinio, base64ToBuffer, getContentTypeFromBase64, MINIO_ENABLED } from '@/lib/minio';
 
 export async function POST(request: NextRequest) {
   try {
@@ -11,33 +10,23 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
     }
 
-    // Check if MinIO is enabled
-    if (!MINIO_ENABLED) {
-      return NextResponse.json({ error: 'MinIO is not enabled' }, { status: 503 });
-    }
-
     const body = await request.json();
-    const { file, fileName } = body;
+    const { file } = body;
 
-    if (!file || !fileName) {
+    if (!file) {
       return NextResponse.json(
-        { error: 'File and fileName are required' },
+        { error: 'File is required' },
         { status: 400 }
       );
     }
 
-    // Convert base64 to buffer
-    const buffer = base64ToBuffer(file);
-    const contentType = getContentTypeFromBase64(file);
-
-    // Upload to MinIO
-    const url = await uploadToMinio(buffer, fileName, contentType);
-
-    return NextResponse.json({ url }, { status: 200 });
+    // Simply return the base64 string as the URL
+    // The base64 string will be stored directly in the database
+    return NextResponse.json({ url: file }, { status: 200 });
   } catch (error) {
-    console.error('Error uploading file:', error);
+    console.error('Error processing file:', error);
     return NextResponse.json(
-      { error: 'Failed to upload file', details: error instanceof Error ? error.message : 'Unknown error' },
+      { error: 'Failed to process file', details: error instanceof Error ? error.message : 'Unknown error' },
       { status: 500 }
     );
   }

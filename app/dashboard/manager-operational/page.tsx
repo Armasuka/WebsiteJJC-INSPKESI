@@ -52,6 +52,8 @@ export default function ManagerOperationalDashboard() {
   const [showSignatureModal, setShowSignatureModal] = useState(false);
   const [signing, setSigning] = useState(false);
   const [activeTab, setActiveTab] = useState<"pending" | "approved">("pending");
+  const [searchQuery, setSearchQuery] = useState("");
+  const [kategoriFilter, setKategoriFilter] = useState("ALL");
   const sigCanvas = useRef<SignatureCanvas>(null);
 
   const fetchInspeksi = async () => {
@@ -127,12 +129,17 @@ export default function ManagerOperationalDashboard() {
     }
 
     try {
+      console.log("🚀 [MANAGER OPS] Starting approval process for:", selectedInspeksi.id);
       setSigning(true);
       const signatureData = sigCanvas.current.toDataURL();
+      console.log("✅ [MANAGER OPS] Signature data captured, length:", signatureData.length);
       
-      // Upload signature to MinIO
+      console.log("📤 [MANAGER OPS] Processing signature...");
+      // Process signature for database storage
       const ttdManagerOperasionalUploaded = await uploadSignatureToMinio(signatureData, 'ttd-manager-operational');
+      console.log("✅ [MANAGER OPS] Signature processed successfully:", ttdManagerOperasionalUploaded);
 
+      console.log("📡 [MANAGER OPS] Sending approval request to API...");
       const response = await fetch(`/api/inspeksi/${selectedInspeksi.id}`, {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
@@ -142,18 +149,24 @@ export default function ManagerOperationalDashboard() {
         }),
       });
 
+      console.log("📥 [MANAGER OPS] API Response status:", response.status);
+      const data = await response.json();
+      console.log("📥 [MANAGER OPS] API Response data:", data);
+
       if (response.ok) {
+        console.log("✅ [MANAGER OPS] Approval successful!");
         alert("Laporan berhasil disetujui!");
         handleCloseSignature();
         fetchInspeksi();
       } else {
-        const error = await response.json();
-        alert(error.message || "Gagal menyetujui laporan");
+        console.error("❌ [MANAGER OPS] Approval failed:", data);
+        alert(data.error || data.message || "Gagal menyetujui laporan");
       }
     } catch (error) {
-      console.error("Error approving inspeksi:", error);
-      alert("Terjadi kesalahan saat menyetujui laporan");
+      console.error("💥 [MANAGER OPS] Error approving inspeksi:", error);
+      alert("Terjadi kesalahan saat menyetujui laporan: " + (error instanceof Error ? error.message : String(error)));
     } finally {
+      console.log("🏁 [MANAGER OPS] Approval process finished");
       setSigning(false);
     }
   };
@@ -164,92 +177,194 @@ export default function ManagerOperationalDashboard() {
     approved: approvedList.length,
   };
 
+  const handleExport = () => {
+    const params = new URLSearchParams();
+    const status = activeTab === "pending" ? "APPROVED_BY_TRAFFIC" : "APPROVED_BY_OPERATIONAL";
+    
+    params.append("status", status);
+    if (kategoriFilter !== "ALL") params.append("kategori", kategoriFilter);
+    if (searchQuery) params.append("search", searchQuery);
+    
+    const url = `/api/inspeksi/export?${params.toString()}`;
+    window.open(url, '_blank');
+  };
+
+  // Filter data based on search and kategori
+  const getFilteredList = (list: Inspeksi[]) => {
+    let filtered = [...list];
+    
+    if (searchQuery.trim()) {
+      filtered = filtered.filter((item) => 
+        item.nomorKendaraan.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+    
+    if (kategoriFilter !== "ALL") {
+      filtered = filtered.filter((item) => item.kategoriKendaraan === kategoriFilter);
+    }
+    
+    return filtered;
+  };
+
+  const filteredPendingList = getFilteredList(inspeksiList);
+  const filteredApprovedList = getFilteredList(approvedList);
+
   return (
     <div className="min-h-screen bg-gray-50" style={{ fontFamily: "'Poppins', sans-serif" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
         {/* Header */}
-        <div className="bg-white rounded-xl shadow-sm p-6 border border-gray-100">
-          <h2 className="text-3xl font-bold text-gray-900 mb-2">
-            Dashboard Manager Operational
-          </h2>
-          <p className="text-gray-600">
-            Selamat datang, <span className="font-semibold text-blue-600">{session?.user?.name}</span>!
-          </p>
+        <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-blue-600">
+          <div className="flex justify-between items-start">
+            <div>
+              <h2 className="text-3xl font-bold text-gray-900 mb-2">
+                Dashboard Manager Operational
+              </h2>
+              <p className="text-gray-600">
+                Selamat datang, <span className="font-semibold text-blue-600">{session?.user?.name}</span>!
+              </p>
+            </div>
+            <a
+              href="/dashboard/manager-operational/rekap"
+              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 flex items-center gap-2 shadow-sm"
+            >
+              📊 Lihat Rekap Laporan
+            </a>
+          </div>
         </div>
 
         {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 transition-colors duration-200">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium mb-1">Menunggu Approval</p>
                 <p className="text-4xl font-bold text-blue-600">{stats.pending}</p>
               </div>
-              <div className="w-14 h-14 bg-blue-100 rounded-xl flex items-center justify-center">
-                <span className="text-3xl">📋</span>
+              <div className="w-14 h-14 bg-blue-100 rounded-lg flex items-center justify-center">
+                <svg className="w-7 h-7 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 transition-colors duration-200">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium mb-1">Sudah Disetujui</p>
                 <p className="text-4xl font-bold text-green-600">{stats.approved}</p>
               </div>
-              <div className="w-14 h-14 bg-green-100 rounded-xl flex items-center justify-center">
-                <span className="text-3xl">✅</span>
+              <div className="w-14 h-14 bg-green-100 rounded-lg flex items-center justify-center">
+                <svg className="w-7 h-7 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 transition-colors duration-200">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium mb-1">Total Laporan</p>
                 <p className="text-4xl font-bold text-purple-600">{stats.total}</p>
               </div>
-              <div className="w-14 h-14 bg-purple-100 rounded-xl flex items-center justify-center">
-                <span className="text-3xl">📊</span>
+              <div className="w-14 h-14 bg-purple-100 rounded-lg flex items-center justify-center">
+                <svg className="w-7 h-7 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
               </div>
             </div>
           </div>
 
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 p-6 hover:shadow-md transition">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 transition-colors duration-200">
             <div className="flex items-center justify-between">
               <div>
                 <p className="text-gray-600 text-sm font-medium mb-1">Status</p>
                 <p className="text-2xl font-bold text-orange-600">Aktif</p>
               </div>
-              <div className="w-14 h-14 bg-orange-100 rounded-xl flex items-center justify-center">
-                <span className="text-3xl">🔥</span>
+              <div className="w-14 h-14 bg-orange-100 rounded-lg flex items-center justify-center">
+                <svg className="w-7 h-7 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
+                </svg>
               </div>
             </div>
           </div>
         </div>
 
         {/* Tabs */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden">
+        <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+          {/* Filter Section */}
+          <div className="p-6 border-b border-gray-200 bg-gray-50">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="font-bold text-gray-700">🔍 Filter & Pencarian</h3>
+              <button
+                onClick={handleExport}
+                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 font-medium shadow-sm flex items-center gap-2"
+              >
+                📥 Export Excel
+              </button>
+            </div>
+            
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  🔎 Cari Nomor Kendaraan
+                </label>
+                <input
+                  type="text"
+                  value={searchQuery}
+                  onChange={(e) => setSearchQuery(e.target.value)}
+                  placeholder="Contoh: B 1234 XYZ"
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white transition-colors duration-200"
+                />
+              </div>
+              
+              <div>
+                <label className="block text-sm font-medium text-gray-700 mb-2">
+                  Filter Kategori
+                </label>
+                <select
+                  value={kategoriFilter}
+                  onChange={(e) => setKategoriFilter(e.target.value)}
+                  className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-colors duration-200"
+                >
+                  <option value="ALL">Semua Kategori</option>
+                  <option value="PLAZA">Plaza</option>
+                  <option value="DEREK">Derek</option>
+                  <option value="KAMTIB">Kamtib</option>
+                  <option value="RESCUE">Rescue</option>
+                </select>
+              </div>
+            </div>
+            
+            <div className="mt-3 text-sm text-gray-600">
+              Menampilkan <span className="font-bold text-blue-600">
+                {activeTab === "pending" ? filteredPendingList.length : filteredApprovedList.length}
+              </span> dari{" "}
+              <span className="font-bold">{activeTab === "pending" ? inspeksiList.length : approvedList.length}</span> laporan
+            </div>
+          </div>
+          
           <div className="flex border-b border-gray-200">
             <button
               onClick={() => setActiveTab("pending")}
-              className={`flex-1 px-6 py-4 text-sm font-semibold transition ${
+              className={`flex-1 px-6 py-4 text-sm font-semibold transition-colors duration-200 ${
                 activeTab === "pending"
                   ? "bg-blue-600 text-white"
                   : "text-gray-600 hover:bg-gray-50"
               }`}
             >
-              📋 Menunggu Approval ({stats.pending})
+              Menunggu Approval ({stats.pending})
             </button>
             <button
               onClick={() => setActiveTab("approved")}
-              className={`flex-1 px-6 py-4 text-sm font-semibold transition ${
+              className={`flex-1 px-6 py-4 text-sm font-semibold transition-colors duration-200 ${
                 activeTab === "approved"
                   ? "bg-green-600 text-white"
                   : "text-gray-600 hover:bg-gray-50"
               }`}
             >
-              ✅ Riwayat Approved ({stats.approved})
+              Riwayat Approved ({stats.approved})
             </button>
           </div>
 
@@ -261,17 +376,23 @@ export default function ManagerOperationalDashboard() {
                 <p className="text-gray-600 mt-4 font-medium">Memuat data...</p>
               </div>
             ) : activeTab === "pending" ? (
-              inspeksiList.length === 0 ? (
+              filteredPendingList.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="text-6xl mb-4">📭</div>
-                  <p className="text-gray-600 font-medium">Tidak ada laporan yang menunggu persetujuan</p>
+                  <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 13V6a2 2 0 00-2-2H6a2 2 0 00-2 2v7m16 0v5a2 2 0 01-2 2H6a2 2 0 01-2-2v-5m16 0h-2.586a1 1 0 00-.707.293l-2.414 2.414a1 1 0 01-.707.293h-3.172a1 1 0 01-.707-.293l-2.414-2.414A1 1 0 006.586 13H4" />
+                  </svg>
+                  <p className="text-gray-600 font-medium">
+                    {inspeksiList.length === 0 
+                      ? "Tidak ada laporan yang menunggu persetujuan" 
+                      : "Tidak ada laporan sesuai filter"}
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {inspeksiList.map((inspeksi) => (
+                  {filteredPendingList.map((inspeksi) => (
                     <div
                       key={inspeksi.id}
-                      className="border border-gray-200 rounded-xl p-5 hover:shadow-md transition bg-white"
+                      className="border border-gray-200 rounded-lg p-5 transition-colors duration-200 bg-white"
                     >
                       <div className="flex justify-between items-start gap-4">
                         <div className="flex-1">
@@ -288,11 +409,11 @@ export default function ManagerOperationalDashboard() {
                           </h4>
                           <div className="text-sm text-gray-600 space-y-1">
                             <p className="flex items-center gap-2">
-                              <span className="font-semibold">👤 Petugas:</span>
+                              <span className="font-semibold">Petugas:</span>
                               {inspeksi.namaPetugas} ({inspeksi.nipPetugas})
                             </p>
                             <p className="flex items-center gap-2">
-                              <span className="font-semibold">� Tanggal:</span>
+                              <span className="font-semibold">Tanggal:</span>
                               {new Date(inspeksi.tanggalInspeksi).toLocaleDateString("id-ID", {
                                 day: "numeric",
                                 month: "long",
@@ -303,7 +424,7 @@ export default function ManagerOperationalDashboard() {
                             </p>
                             {inspeksi.approvedAtTraffic && (
                               <p className="flex items-center gap-2">
-                                <span className="font-semibold">✅ Disetujui Traffic:</span>
+                                <span className="font-semibold">Disetujui Traffic:</span>
                                 {new Date(inspeksi.approvedAtTraffic).toLocaleDateString("id-ID", {
                                   day: "numeric",
                                   month: "long",
@@ -318,17 +439,17 @@ export default function ManagerOperationalDashboard() {
                         <div className="flex gap-2">
                           <button
                             onClick={() => handleOpenSignature(inspeksi)}
-                            className="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition font-semibold text-sm shadow-sm"
+                            className="px-5 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors duration-200 font-semibold text-sm shadow-sm"
                           >
-                            ✓ Setujui
+                            Setujui
                           </button>
                           <a
                             href={`/dashboard/petugas-lapangan/inspeksi/${inspeksi.id}`}
                             target="_blank"
                             rel="noopener noreferrer"
-                            className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition font-semibold text-sm shadow-sm"
+                            className="px-5 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors duration-200 font-semibold text-sm shadow-sm"
                           >
-                            👁️ Lihat
+                            Lihat
                           </a>
                         </div>
                       </div>
@@ -337,17 +458,23 @@ export default function ManagerOperationalDashboard() {
                 </div>
               )
             ) : (
-              approvedList.length === 0 ? (
+              filteredApprovedList.length === 0 ? (
                 <div className="text-center py-12">
-                  <div className="text-6xl mb-4">�</div>
-                  <p className="text-gray-600 font-medium">Belum ada laporan yang disetujui</p>
+                  <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                  </svg>
+                  <p className="text-gray-600 font-medium">
+                    {approvedList.length === 0 
+                      ? "Belum ada laporan yang disetujui" 
+                      : "Tidak ada laporan sesuai filter"}
+                  </p>
                 </div>
               ) : (
                 <div className="space-y-4">
-                  {approvedList.map((inspeksi) => (
+                  {filteredApprovedList.map((inspeksi) => (
                     <div
                       key={inspeksi.id}
-                      className="border border-green-200 rounded-xl p-5 bg-green-50 hover:shadow-md transition"
+                      className="border border-green-200 rounded-lg p-5 bg-green-50 transition-colors duration-200"
                     >
                       <div className="flex justify-between items-start gap-4">
                         <div className="flex-1">
@@ -356,7 +483,7 @@ export default function ManagerOperationalDashboard() {
                               {inspeksi.kategoriKendaraan}
                             </span>
                             <span className="px-3 py-1 bg-green-600 text-white text-xs font-semibold rounded-lg">
-                              ✅ Approved
+                              Approved
                             </span>
                           </div>
                           <h4 className="font-bold text-gray-900 text-lg mb-2">
@@ -364,11 +491,11 @@ export default function ManagerOperationalDashboard() {
                           </h4>
                           <div className="text-sm text-gray-700 space-y-1">
                             <p className="flex items-center gap-2">
-                              <span className="font-semibold">👤 Petugas:</span>
+                              <span className="font-semibold">Petugas:</span>
                               {inspeksi.namaPetugas} ({inspeksi.nipPetugas})
                             </p>
                             <p className="flex items-center gap-2">
-                              <span className="font-semibold">📅 Inspeksi:</span>
+                              <span className="font-semibold">Inspeksi:</span>
                               {new Date(inspeksi.tanggalInspeksi).toLocaleDateString("id-ID", {
                                 day: "numeric",
                                 month: "long",

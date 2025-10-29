@@ -33,6 +33,18 @@ export async function GET(
             email: true,
           },
         },
+        komentar: {
+          orderBy: {
+            createdAt: 'asc',
+          },
+          select: {
+            id: true,
+            namaPengirim: true,
+            rolePengirim: true,
+            isiKomentar: true,
+            createdAt: true,
+          },
+        },
       },
     });
 
@@ -85,19 +97,28 @@ export async function PATCH(
     const body = await request.json();
     const { action, ...updateData } = body;
 
+    console.log("🔍 PATCH Request - ID:", params.id);
+    console.log("🔍 Action:", action);
+    console.log("🔍 User Role:", session.user.role);
+    console.log("🔍 Update Data:", updateData);
+
     const inspeksi = await prisma.inspeksi.findUnique({
       where: { id: params.id },
     });
 
     if (!inspeksi) {
+      console.error("❌ Inspeksi not found:", params.id);
       return NextResponse.json(
         { error: "Inspeksi not found" },
         { status: 404 }
       );
     }
 
+    console.log("📋 Current Inspeksi Status:", inspeksi.status);
+
     // Handle approval/rejection oleh Manager Traffic
     if (action === "approve_traffic" && session.user.role === "MANAGER_TRAFFIC") {
+      console.log("✅ Processing Manager Traffic approval...");
       const updated = await prisma.inspeksi.update({
         where: { id: params.id },
         data: {
@@ -107,6 +128,7 @@ export async function PATCH(
           ttdManagerTraffic: updateData.ttdManagerTraffic || null,
         },
       });
+      console.log("✅ Manager Traffic approval successful");
       return NextResponse.json({
         success: true,
         inspeksi: updated,
@@ -115,14 +137,20 @@ export async function PATCH(
     }
 
     if (action === "approve_operational" && session.user.role === "MANAGER_OPERATIONAL") {
+      console.log("🔍 [API] Processing Manager Operational approval...");
+      console.log("🔍 [API] Current status:", inspeksi.status);
+      
       // Pastikan sudah disetujui Manager Traffic dulu
       if (inspeksi.status !== "APPROVED_BY_TRAFFIC") {
+        console.error("❌ [API] Cannot approve - not yet approved by Manager Traffic");
+        console.error("❌ [API] Current status:", inspeksi.status, "Expected: APPROVED_BY_TRAFFIC");
         return NextResponse.json(
           { error: "Inspeksi harus disetujui oleh Manager Traffic terlebih dahulu" },
           { status: 400 }
         );
       }
 
+      console.log("✅ [API] Updating inspeksi to APPROVED_BY_OPERATIONAL...");
       const updated = await prisma.inspeksi.update({
         where: { id: params.id },
         data: {
@@ -132,6 +160,7 @@ export async function PATCH(
           ttdManagerOperasional: updateData.ttdManagerOperasional || null,
         },
       });
+      console.log("✅ [API] Manager Operational approval successful");
       
       // Auto-generate PDF akan dilakukan by client side atau manual trigger
       // karena jsPDF tidak work well di server side Next.js

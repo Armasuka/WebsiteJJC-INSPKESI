@@ -122,12 +122,10 @@ export async function POST(request: Request) {
         nipPetugas2: body.nipPetugas2 || null,
         
         // Dokumen STNK
-        nomorSTNK: body.nomorSTNK || null,
         masaBerlakuSTNK: parseDate(body.masaBerlakuSTNK) as any,
         fotoSTNK: body.fotoSTNK || null,
         
         // Dokumen KIR
-        nomorKIR: body.nomorKIR || null,
         masaBerlakuKIR: parseDate(body.masaBerlakuKIR) as any,
         fotoKIR: body.fotoKIR || null,
         
@@ -143,9 +141,9 @@ export async function POST(request: Request) {
         jumlahBBM: body.jumlahBBM || null,
         fotoBBM: body.fotoBBM || null,
         
-        // Data khusus dan kelengkapan
+        // Data khusus dan kelengkapan - SEMUA data tambahan masuk ke JSON
         kelengkapanKendaraan,
-        dataKhusus: dataKhusus as any, // Save all specific data here
+        dataKhusus: dataKhusus as any,
         catatan: body.catatan || null,
         status: body.status,
         needsApproval: body.status === "SUBMITTED",
@@ -193,6 +191,9 @@ export async function GET(request: Request) {
     const { searchParams } = new URL(request.url);
     const status = searchParams.get("status");
     const kategori = searchParams.get("kategori");
+    const search = searchParams.get("search");
+    const startDate = searchParams.get("startDate");
+    const endDate = searchParams.get("endDate");
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "50");
     const skip = (page - 1) * limit;
@@ -212,6 +213,22 @@ export async function GET(request: Request) {
     // Filter berdasarkan kategori
     if (kategori) {
       where.kategoriKendaraan = kategori;
+    }
+
+    // Search by nomor kendaraan (plat nomor)
+    if (search) {
+      where.nomorKendaraan = {
+        contains: search,
+        mode: 'insensitive'
+      };
+    }
+
+    // Filter by date range
+    if (startDate && endDate) {
+      where.tanggalInspeksi = {
+        gte: new Date(startDate),
+        lte: new Date(endDate + 'T23:59:59.999Z')
+      };
     }
 
     // Optimasi: Select only necessary fields untuk list view

@@ -6,7 +6,7 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
+  provider = "sqlite"
   url      = env("DATABASE_URL")
 }
 
@@ -19,6 +19,7 @@ model User {
   createdAt   DateTime     @default(now())
   updatedAt   DateTime     @updatedAt
   inspeksi    Inspeksi[]   @relation("PetugasInspeksi")
+  komentarInspeksi Komentar[] @relation("KomentarPengirim")
 
   @@map("users")
 }
@@ -39,39 +40,37 @@ model Inspeksi {
   nipPetugas2           String?
   
   // Dokumen STNK - ACTUAL dari form
-  nomorSTNK             String?
   masaBerlakuSTNK       DateTime?
-  fotoSTNK              String?           @db.Text  // Base64 image
+  fotoSTNK              String?           // Base64 image
   
   // Dokumen KIR - ACTUAL dari form
-  nomorKIR              String?
   masaBerlakuKIR        DateTime?
-  fotoKIR               String?           @db.Text  // Base64 image
+  fotoKIR               String?           // Base64 image
   
   // SIM Petugas 1 - ACTUAL dari form
   masaBerlakuSIMPetugas1 DateTime?
-  fotoSIMPetugas1       String?           @db.Text  // Base64 image
+  fotoSIMPetugas1       String?           // Base64 image
   
   // SIM Petugas 2 - ACTUAL dari form
   masaBerlakuSIMPetugas2 DateTime?
-  fotoSIMPetugas2       String?           @db.Text  // Base64 image
+  fotoSIMPetugas2       String?           // Base64 image
   
   // Service Terakhir - ACTUAL dari form
   tanggalService        DateTime?
-  fotoService           String?           @db.Text  // Base64 image
+  fotoService           String?           // Base64 image
   
   // BBM - ACTUAL dari form
-  jumlahBBM             String?           // Jumlah BBM dalam BAR
-  fotoBBM               String?           @db.Text  // Base64 image
+  jumlahBBM             String?           // Jumlah BBM dalam Liter atau BAR
+  fotoBBM               String?           // Base64 image
   
-  // Data khusus per kategori (JSON)
-  dataKhusus            Json?             // TTD, kelengkapan detail, latitude, longitude, dll
+  // Data khusus per kategori (JSON) - merk, tahun, warna, GPS, TTD, dll
+  dataKhusus            Json?
   
   // Kelengkapan checklist (JSON)
   kelengkapanKendaraan  Json?             // Checklist kelengkapan
   
   // Catatan
-  catatan               String?           @db.Text
+  catatan               String?
   
   // Status
   status                StatusInspeksi    @default(DRAFT)
@@ -80,15 +79,15 @@ model Inspeksi {
   needsApproval         Boolean           @default(true)
   approvedByTraffic     String?           // User ID Manager Traffic
   approvedAtTraffic     DateTime?
-  ttdManagerTraffic     String?           @db.Text  // Base64 signature
+  ttdManagerTraffic     String?           // Base64 signature
   
   // Approval Manager Operational
   approvedByOperational String?           // User ID Manager Operational
   approvedAtOperational DateTime?
-  ttdManagerOperasional String?           @db.Text  // Base64 signature
+  ttdManagerOperasional String?           // Base64 signature
   
   // Rejection
-  rejectionNote         String?           @db.Text
+  rejectionNote         String?
   rejectedBy            String?           // "TRAFFIC" atau "OPERATIONAL"
   rejectedAt            DateTime?
   
@@ -99,6 +98,7 @@ model Inspeksi {
   // Relations
   petugasId             String
   petugas               User              @relation("PetugasInspeksi", fields: [petugasId], references: [id])
+  komentar              Komentar[]        @relation("InspeksiKomentar")
   
   createdAt             DateTime          @default(now())
   updatedAt             DateTime          @updatedAt
@@ -111,6 +111,26 @@ model Inspeksi {
   @@index([petugasId, status])
   @@index([status, createdAt])
   @@map("inspeksi")
+}
+
+model Komentar {
+  id              String    @id @default(cuid())
+  inspeksiId      String
+  inspeksi        Inspeksi  @relation("InspeksiKomentar", fields: [inspeksiId], references: [id], onDelete: Cascade)
+  
+  pengirimId      String
+  pengirim        User      @relation("KomentarPengirim", fields: [pengirimId], references: [id])
+  namaPengirim    String    // Nama user untuk display
+  rolePengirim    Role      // Role user untuk styling
+  
+  isiKomentar     String    // Isi komentar/pesan
+  
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([inspeksiId])
+  @@index([createdAt])
+  @@map("komentar")
 }
 
 enum Role {
@@ -132,4 +152,53 @@ enum StatusInspeksi {
   APPROVED_BY_TRAFFIC
   APPROVED_BY_OPERATIONAL
   REJECTED
+}
+
+model RekapManager {
+  id                String          @id @default(cuid())
+  judulRekap        String          // Judul rekap yang dikirim
+  periodeType       PeriodType      // HARIAN, MINGGUAN, BULANAN, TAHUNAN, KUSTOM
+  tanggalMulai      DateTime        // Start date periode
+  tanggalSelesai    DateTime        // End date periode
+  kategoriKendaraan String?         // Filter kategori (null = semua)
+  
+  // Data statistik
+  totalInspeksi     Int             @default(0)
+  dataStatistik     Json?           // Breakdown per kategori, status, dll
+  
+  // Pengirim (Petugas)
+  pengirimId        String
+  namaPengirim      String
+  
+  // Penerima (Manager)
+  receiverRole      ManagerRole     // TRAFFIC atau OPERATIONAL
+  
+  // Status
+  isRead            Boolean         @default(false)
+  readAt            DateTime?
+  
+  // Metadata
+  catatan           String?
+  
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  @@index([receiverRole])
+  @@index([isRead])
+  @@index([createdAt])
+  @@index([periodeType])
+  @@map("rekap_manager")
+}
+
+enum PeriodType {
+  HARIAN
+  MINGGUAN
+  BULANAN
+  TAHUNAN
+  KUSTOM
+}
+
+enum ManagerRole {
+  TRAFFIC
+  OPERATIONAL
 }

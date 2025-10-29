@@ -1,51 +1,21 @@
 /**
- * Upload file to MinIO server
+ * Process file for database storage
  * @param file - File object or base64 string
- * @param fileName - Optional custom filename
- * @returns URL of the uploaded file or base64 string if upload fails
+ * @param fileName - Optional custom filename (not used, kept for compatibility)
+ * @returns Base64 string to be stored in database
  */
 export async function uploadFileToMinio(
   file: File | string,
   fileName?: string
 ): Promise<string> {
-  // If already a string (base64 from localStorage), upload it
+  // If already a string (base64), return it directly
   if (typeof file === 'string') {
-    // If it's already a URL (starts with http), return as is
-    if (file.startsWith('http://') || file.startsWith('https://')) {
-      return file;
-    }
-    
-    // If it's base64, try to upload to MinIO
-    try {
-      const generatedFileName = fileName || `image-${Date.now()}.jpg`;
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          file: file,
-          fileName: generatedFileName,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        return data.url;
-      } else {
-        console.error('Failed to upload to MinIO, using base64 fallback');
-        return file; // Return base64 as fallback
-      }
-    } catch (error) {
-      console.error('Error uploading to MinIO:', error);
-      return file; // Return base64 as fallback
-    }
+    return file;
   }
 
-  // If it's a File object, convert to base64 first then upload
+  // If it's a File object, convert to base64
   if (file instanceof File) {
     try {
-      // Convert File to base64
       const base64 = await new Promise<string>((resolve, reject) => {
         const reader = new FileReader();
         reader.onloadend = () => resolve(reader.result as string);
@@ -53,26 +23,7 @@ export async function uploadFileToMinio(
         reader.readAsDataURL(file);
       });
 
-      // Upload to MinIO
-      const uploadFileName = fileName || file.name;
-      const response = await fetch('/api/upload', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          file: base64,
-          fileName: uploadFileName,
-        }),
-      });
-
-      if (response.ok) {
-        const data = await response.json();
-        return data.url;
-      } else {
-        console.error('Failed to upload to MinIO, using base64 fallback');
-        return base64; // Return base64 as fallback
-      }
+      return base64;
     } catch (error) {
       console.error('Error processing file:', error);
       throw error;
@@ -98,44 +49,15 @@ export function fileToBase64(file: File): Promise<string> {
 }
 
 /**
- * Upload signature (base64 PNG) to MinIO
+ * Process signature for database storage
  * @param signatureBase64 - Base64 encoded signature data (from canvas.toDataURL())
- * @param signatureType - Type of signature (e.g., 'ttd-petugas1', 'ttd-manager-traffic')
- * @returns URL of the uploaded signature or base64 string if upload fails
+ * @param signatureType - Type of signature (kept for compatibility, not used)
+ * @returns Base64 string to be stored in database
  */
 export async function uploadSignatureToMinio(
   signatureBase64: string,
   signatureType: string
 ): Promise<string> {
-  // If already a URL (starts with http), return as is
-  if (signatureBase64.startsWith('http://') || signatureBase64.startsWith('https://')) {
-    return signatureBase64;
-  }
-
-  // Try to upload to MinIO
-  try {
-    const fileName = `${signatureType}-${Date.now()}.png`;
-    const response = await fetch('/api/upload', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        file: signatureBase64,
-        fileName: fileName,
-      }),
-    });
-
-    if (response.ok) {
-      const data = await response.json();
-      console.log(`✅ Signature uploaded to MinIO: ${data.url}`);
-      return data.url;
-    } else {
-      console.error('Failed to upload signature to MinIO, using base64 fallback');
-      return signatureBase64; // Return base64 as fallback
-    }
-  } catch (error) {
-    console.error('Error uploading signature to MinIO:', error);
-    return signatureBase64; // Return base64 as fallback
-  }
+  // Simply return the base64 string directly
+  return signatureBase64;
 }

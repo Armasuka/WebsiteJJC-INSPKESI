@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
+import { useRouter } from "next/navigation";
 
 interface Inspeksi {
   id: string;
@@ -16,6 +17,7 @@ interface Inspeksi {
 type PeriodFilter = "today" | "week" | "month" | "custom" | "all";
 
 export default function RiwayatInspeksiPage() {
+  const router = useRouter();
   const [inspeksi, setInspeksi] = useState<Inspeksi[]>([]);
   const [filteredInspeksi, setFilteredInspeksi] = useState<Inspeksi[]>([]);
   const [loading, setLoading] = useState(true);
@@ -24,6 +26,7 @@ export default function RiwayatInspeksiPage() {
   const [periodFilter, setPeriodFilter] = useState<PeriodFilter>("all");
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
+  const [searchQuery, setSearchQuery] = useState("");
 
   useEffect(() => {
     fetchInspeksi();
@@ -31,7 +34,7 @@ export default function RiwayatInspeksiPage() {
 
   useEffect(() => {
     applyFilters();
-  }, [inspeksi, statusFilter, kategoriFilter, periodFilter, customStartDate, customEndDate]);
+  }, [inspeksi, statusFilter, kategoriFilter, periodFilter, customStartDate, customEndDate, searchQuery]);
 
   const fetchInspeksi = async () => {
     try {
@@ -86,6 +89,13 @@ export default function RiwayatInspeksiPage() {
       filtered = filtered.filter((item) => item.kategoriKendaraan === kategoriFilter);
     }
 
+    // Search by nomor kendaraan
+    if (searchQuery.trim()) {
+      filtered = filtered.filter((item) => 
+        item.nomorKendaraan.toLowerCase().includes(searchQuery.toLowerCase())
+      );
+    }
+
     // Filter by period
     if (periodFilter !== "all") {
       const now = new Date();
@@ -123,104 +133,137 @@ export default function RiwayatInspeksiPage() {
     setFilteredInspeksi(filtered);
   };
 
+  const handleExport = () => {
+    const params = new URLSearchParams();
+    
+    if (statusFilter !== "ALL") params.append("status", statusFilter);
+    if (kategoriFilter !== "ALL") params.append("kategori", kategoriFilter);
+    if (searchQuery) params.append("search", searchQuery);
+    if (customStartDate) params.append("startDate", customStartDate);
+    if (customEndDate) params.append("endDate", customEndDate);
+    
+    const url = `/api/inspeksi/export?${params.toString()}`;
+    window.open(url, '_blank');
+  };
+
   const getStatusBadge = (status: string) => {
-    const badges: Record<string, { color: string; text: string; icon: string }> = {
-      DRAFT: { color: "bg-gray-100 text-gray-800", text: "Draft", icon: "💾" },
-      SUBMITTED: { color: "bg-yellow-100 text-yellow-800", text: "Menunggu Manager Traffic", icon: "⏳" },
-      APPROVED_BY_TRAFFIC: { color: "bg-blue-100 text-blue-800", text: "Menunggu Manager Ops", icon: "🔵" },
-      APPROVED_BY_OPERATIONAL: { color: "bg-green-100 text-green-800", text: "✓ APPROVED", icon: "✅" },
-      REJECTED: { color: "bg-red-100 text-red-800", text: "✗ DITOLAK", icon: "❌" },
+    const badges: Record<string, { color: string; text: string }> = {
+      DRAFT: { color: "bg-gray-100 text-gray-800", text: "Draft" },
+      SUBMITTED: { color: "bg-yellow-100 text-yellow-800", text: "Menunggu Manager Traffic" },
+      APPROVED_BY_TRAFFIC: { color: "bg-blue-100 text-blue-800", text: "Menunggu Manager Ops" },
+      APPROVED_BY_OPERATIONAL: { color: "bg-green-100 text-green-800", text: "APPROVED" },
+      REJECTED: { color: "bg-red-100 text-red-800", text: "DITOLAK" },
     };
     const badge = badges[status] || badges.DRAFT;
     return (
-      <span className={`px-3 py-1 rounded-full text-xs font-medium ${badge.color}`}>
-        {badge.icon} {badge.text}
+      <span className={`px-3 py-1 rounded-lg text-xs font-medium ${badge.color}`}>
+        {badge.text}
       </span>
     );
   };
 
-  const getKategoriIcon = (kategori: string) => {
-    const icons: Record<string, string> = {
-      PLAZA: "🏢",
-      DEREK: "🚚",
-      KAMTIB: "🛡️",
-      RESCUE: "🚒",
-    };
-    return icons[kategori] || "🚗";
-  };
-
   return (
     <div className="space-y-6">
+      {/* Back Button */}
+      <button
+        onClick={() => router.push('/dashboard/petugas-lapangan')}
+        className="flex items-center gap-2 px-4 py-2 bg-gray-600 hover:bg-gray-700 text-white rounded-lg transition-colors duration-200 font-medium shadow-sm"
+      >
+        ← Kembali
+      </button>
+
       <div className="flex items-center justify-between">
-        <div>
-          <h2 className="text-3xl font-bold bg-gradient-to-r from-purple-700 to-blue-600 bg-clip-text text-transparent mb-2">
+        <div className="bg-white rounded-lg shadow-sm p-6 border-l-4 border-purple-600 flex-1 mr-4">
+          <h2 className="text-3xl font-bold text-gray-900 mb-2">
             Riwayat Inspeksi Kendaraan
           </h2>
           <p className="text-gray-600">Daftar lengkap semua inspeksi dengan filter periode & status</p>
         </div>
         <Link href="/dashboard/petugas-lapangan/inspeksi">
-          <button className="px-6 py-3 bg-blue-700 hover:bg-blue-800 text-white rounded-lg transition font-medium shadow-md">
-            ➕ Inspeksi Baru
+          <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 font-medium shadow-sm">
+            Inspeksi Baru
           </button>
         </Link>
       </div>
 
       {/* Filters */}
-      <div className="bg-white rounded-lg shadow-md border-t-4 border-purple-600 p-6">
-        <h3 className="font-bold text-purple-700 mb-4 flex items-center gap-2">
-          <span className="text-xl">🔍</span> Filter & Pencarian
-        </h3>
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-bold text-purple-600 flex items-center gap-2">
+            🔍 Filter & Pencarian
+          </h3>
+          <button
+            onClick={handleExport}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 font-medium shadow-sm flex items-center gap-2"
+          >
+            📥 Export Excel
+          </button>
+        </div>
+        
+        {/* Search Box */}
+        <div className="mb-4">
+          <label className="block text-sm font-medium text-gray-700 mb-2">
+            🔎 Cari Nomor Kendaraan / Plat Nomor
+          </label>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Contoh: B 1234 XYZ"
+            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent bg-white transition-colors duration-200"
+          />
+        </div>
         
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              📅 Filter Periode
+              Filter Periode
             </label>
             <select
               value={periodFilter}
               onChange={(e) => setPeriodFilter(e.target.value as PeriodFilter)}
-              className="w-full px-4 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent bg-white"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent bg-white transition-colors duration-200"
             >
-              <option value="all">📋 Semua Waktu</option>
-              <option value="today">📅 Hari Ini</option>
-              <option value="week">📆 Minggu Ini (7 Hari Terakhir)</option>
-              <option value="month">🗓️ Bulan Ini</option>
-              <option value="custom">🔧 Custom Tanggal</option>
+              <option value="all">Semua Waktu</option>
+              <option value="today">Hari Ini</option>
+              <option value="week">Minggu Ini (7 Hari Terakhir)</option>
+              <option value="month">Bulan Ini</option>
+              <option value="custom">Custom Tanggal</option>
             </select>
           </div>
 
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              📊 Filter Status
+              Filter Status
             </label>
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-colors duration-200"
             >
               <option value="ALL">Semua Status</option>
-              <option value="DRAFT">💾 Draft</option>
-              <option value="SUBMITTED">⏳ Menunggu Manager Traffic</option>
-              <option value="APPROVED_BY_TRAFFIC">🔵 Menunggu Manager Ops</option>
-              <option value="APPROVED_BY_OPERATIONAL">✅ Approved</option>
-              <option value="REJECTED">❌ Ditolak</option>
+              <option value="DRAFT">Draft</option>
+              <option value="SUBMITTED">Menunggu Manager Traffic</option>
+              <option value="APPROVED_BY_TRAFFIC">Menunggu Manager Ops</option>
+              <option value="APPROVED_BY_OPERATIONAL">Approved</option>
+              <option value="REJECTED">Ditolak</option>
             </select>
           </div>
           
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              🚗 Filter Kategori
+              Filter Kategori
             </label>
             <select
               value={kategoriFilter}
               onChange={(e) => setKategoriFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-red-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-colors duration-200"
             >
               <option value="ALL">Semua Kategori</option>
-              <option value="PLAZA">🏢 Plaza</option>
-              <option value="DEREK">🚚 Derek</option>
-              <option value="KAMTIB">🛡️ Kamtib</option>
-              <option value="RESCUE">🚒 Rescue</option>
+              <option value="PLAZA">Plaza</option>
+              <option value="DEREK">Derek</option>
+              <option value="KAMTIB">Kamtib</option>
+              <option value="RESCUE">Rescue</option>
             </select>
           </div>
         </div>
@@ -230,33 +273,33 @@ export default function RiwayatInspeksiPage() {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mt-4 p-4 bg-purple-50 rounded-lg border border-purple-200">
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                📅 Dari Tanggal
+                Dari Tanggal
               </label>
               <input
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-colors duration-200"
               />
             </div>
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-2">
-                📅 Sampai Tanggal
+                Sampai Tanggal
               </label>
               <input
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="w-full px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-colors duration-200"
               />
             </div>
           </div>
         )}
 
         {/* Results Summary */}
-        <div className="mt-4 pt-4 border-t border-purple-200">
-          <p className="text-sm text-purple-800 font-medium">
-            📊 Menampilkan <span className="text-lg font-bold">{filteredInspeksi.length}</span> dari{" "}
+        <div className="mt-4 pt-4 border-t border-gray-200">
+          <p className="text-sm text-purple-600 font-medium">
+            Menampilkan <span className="text-lg font-bold">{filteredInspeksi.length}</span> dari{" "}
             <span className="text-lg font-bold">{inspeksi.length}</span> total inspeksi
           </p>
         </div>
@@ -265,31 +308,27 @@ export default function RiwayatInspeksiPage() {
       {/* Summary per Kategori */}
       {filteredInspeksi.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-          <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-3 text-center border-2 border-blue-200 shadow-sm">
-            <div className="text-3xl mb-1">🏢</div>
-            <p className="text-xs text-gray-600 font-medium">Plaza</p>
-            <p className="text-2xl font-bold text-blue-700">
+          <div className="bg-blue-50 rounded-lg p-3 text-center border border-blue-200 shadow-sm">
+            <p className="text-xs text-gray-600 font-medium mb-1">Plaza</p>
+            <p className="text-2xl font-bold text-blue-600">
               {filteredInspeksi.filter(i => i.kategoriKendaraan === "PLAZA").length}
             </p>
           </div>
-          <div className="bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-3 text-center border-2 border-yellow-200 shadow-sm">
-            <div className="text-3xl mb-1">🚚</div>
-            <p className="text-xs text-gray-600 font-medium">Derek</p>
-            <p className="text-2xl font-bold text-yellow-700">
+          <div className="bg-yellow-50 rounded-lg p-3 text-center border border-yellow-200 shadow-sm">
+            <p className="text-xs text-gray-600 font-medium mb-1">Derek</p>
+            <p className="text-2xl font-bold text-yellow-600">
               {filteredInspeksi.filter(i => i.kategoriKendaraan === "DEREK").length}
             </p>
           </div>
-          <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-3 text-center border-2 border-green-200 shadow-sm">
-            <div className="text-3xl mb-1">🛡️</div>
-            <p className="text-xs text-gray-600 font-medium">Kamtib</p>
-            <p className="text-2xl font-bold text-green-700">
+          <div className="bg-green-50 rounded-lg p-3 text-center border border-green-200 shadow-sm">
+            <p className="text-xs text-gray-600 font-medium mb-1">Kamtib</p>
+            <p className="text-2xl font-bold text-green-600">
               {filteredInspeksi.filter(i => i.kategoriKendaraan === "KAMTIB").length}
             </p>
           </div>
-          <div className="bg-gradient-to-br from-orange-50 to-orange-100 rounded-lg p-3 text-center border-2 border-orange-200 shadow-sm">
-            <div className="text-3xl mb-1">🚒</div>
-            <p className="text-xs text-gray-600 font-medium">Rescue</p>
-            <p className="text-2xl font-bold text-orange-700">
+          <div className="bg-orange-50 rounded-lg p-3 text-center border border-orange-200 shadow-sm">
+            <p className="text-xs text-gray-600 font-medium mb-1">Rescue</p>
+            <p className="text-2xl font-bold text-orange-600">
               {filteredInspeksi.filter(i => i.kategoriKendaraan === "RESCUE").length}
             </p>
           </div>
@@ -303,8 +342,10 @@ export default function RiwayatInspeksiPage() {
           <p className="text-gray-600 mt-4">Memuat data...</p>
         </div>
       ) : filteredInspeksi.length === 0 ? (
-        <div className="bg-white rounded-lg shadow-md p-12 text-center">
-          <div className="text-6xl mb-4">📋</div>
+        <div className="bg-white rounded-lg shadow-sm p-12 text-center border border-gray-200">
+          <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
           <h3 className="text-xl font-semibold text-gray-800 mb-2">
             {inspeksi.length === 0 ? "Belum Ada Inspeksi" : "Tidak Ada Data Sesuai Filter"}
           </h3>
@@ -315,7 +356,7 @@ export default function RiwayatInspeksiPage() {
           </p>
           {inspeksi.length === 0 && (
             <Link href="/dashboard/petugas-lapangan/inspeksi">
-              <button className="px-6 py-2 bg-blue-700 hover:bg-blue-800 text-white rounded-lg transition">
+              <button className="px-6 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 shadow-sm">
                 Buat Inspeksi Baru
               </button>
             </Link>
@@ -324,10 +365,10 @@ export default function RiwayatInspeksiPage() {
       ) : (
         <div className="space-y-4">
           {/* Table */}
-          <div className="bg-white rounded-lg shadow-md border border-gray-200 overflow-hidden">
+          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full">
-                <thead className="bg-gradient-to-r from-purple-700 to-blue-700 text-white">
+                <thead className="bg-purple-600 text-white">
                   <tr>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase">No</th>
                     <th className="px-4 py-3 text-left text-xs font-semibold uppercase">Kategori</th>
@@ -340,16 +381,15 @@ export default function RiwayatInspeksiPage() {
                 </thead>
                 <tbody className="divide-y divide-gray-200 bg-white">
                   {filteredInspeksi.map((item, index) => (
-                    <tr key={item.id} className="hover:bg-purple-50 transition">
+                    <tr key={item.id} className="hover:bg-purple-50 transition-colors duration-200">
                       <td className="px-4 py-3 text-sm text-gray-700 font-medium">{index + 1}</td>
                       <td className="px-4 py-3">
-                        <div className="flex items-center gap-2">
-                          <span className="text-2xl">{getKategoriIcon(item.kategoriKendaraan)}</span>
-                          <span className="text-sm font-semibold text-gray-800">{item.kategoriKendaraan}</span>
-                        </div>
+                        <span className="px-3 py-1 bg-blue-100 text-blue-800 text-xs font-medium rounded-lg">
+                          {item.kategoriKendaraan}
+                        </span>
                       </td>
                       <td className="px-4 py-3">
-                        <span className="text-sm font-bold text-blue-700">{item.nomorKendaraan}</span>
+                        <span className="text-sm font-bold text-blue-600">{item.nomorKendaraan}</span>
                       </td>
                       <td className="px-4 py-3 text-sm text-gray-600">
                         {item.lokasiInspeksi || "-"}
@@ -367,31 +407,31 @@ export default function RiwayatInspeksiPage() {
                       <td className="px-4 py-3 text-center">
                         <div className="flex gap-1 justify-center flex-wrap">
                           <Link href={`/dashboard/petugas-lapangan/inspeksi/${item.id}`}>
-                            <button className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded text-xs font-medium transition">
-                              👁️ Detail
+                            <button className="px-3 py-1 bg-purple-600 hover:bg-purple-700 text-white rounded-lg text-xs font-medium transition-colors duration-200 shadow-sm">
+                              Detail
                             </button>
                           </Link>
                           {item.status === "DRAFT" && (
                             <>
                               <Link href={`/dashboard/petugas-lapangan/inspeksi/${item.kategoriKendaraan.toLowerCase()}?draft=${item.id}`}>
-                                <button className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded text-xs font-medium transition">
-                                  📝 Lanjutkan
+                                <button className="px-3 py-1 bg-green-600 hover:bg-green-700 text-white rounded-lg text-xs font-medium transition-colors duration-200 shadow-sm">
+                                  Lanjutkan
                                 </button>
                               </Link>
                               <button 
                                 onClick={() => handleDelete(item.id, item.nomorKendaraan)}
-                                className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-medium transition"
+                                className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-medium transition-colors duration-200 shadow-sm"
                               >
-                                🗑️ Hapus
+                                Hapus
                               </button>
                             </>
                           )}
-                          {item.status === "APPROVED_BY_OPERATIONAL" && (item as any).pdfUrl && (
-                            <a href={(item as any).pdfUrl} target="_blank" rel="noopener noreferrer">
-                              <button className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded text-xs font-medium transition">
-                                📄 PDF
+                          {(item.status === "APPROVED_BY_OPERATIONAL" || item.status === "APPROVED_BY_TRAFFIC" || item.status === "SUBMITTED") && (
+                            <Link href={`/dashboard/petugas-lapangan/inspeksi/${item.id}`}>
+                              <button className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs font-medium transition-colors duration-200 shadow-sm">
+                                PDF
                               </button>
-                            </a>
+                            </Link>
                           )}
                         </div>
                       </td>
@@ -404,23 +444,23 @@ export default function RiwayatInspeksiPage() {
 
           {/* Summary Stats */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="text-center bg-gradient-to-br from-gray-50 to-gray-100 rounded-lg p-4 border border-gray-200">
+            <div className="text-center bg-gray-50 rounded-lg p-4 border border-gray-200">
               <p className="text-2xl font-bold text-gray-700">{filteredInspeksi.length}</p>
               <p className="text-xs text-gray-600 font-medium">Total Kendaraan</p>
             </div>
-            <div className="text-center bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 border border-green-200">
-              <p className="text-2xl font-bold text-green-700">
+            <div className="text-center bg-green-50 rounded-lg p-4 border border-green-200">
+              <p className="text-2xl font-bold text-green-600">
                 {filteredInspeksi.filter(i => i.status === "APPROVED").length}
               </p>
               <p className="text-xs text-gray-600 font-medium">Disetujui</p>
             </div>
-            <div className="text-center bg-gradient-to-br from-yellow-50 to-yellow-100 rounded-lg p-4 border border-yellow-200">
-              <p className="text-2xl font-bold text-yellow-700">
+            <div className="text-center bg-yellow-50 rounded-lg p-4 border border-yellow-200">
+              <p className="text-2xl font-bold text-yellow-600">
                 {filteredInspeksi.filter(i => i.status === "SUBMITTED").length}
               </p>
               <p className="text-xs text-gray-600 font-medium">Pending</p>
             </div>
-            <div className="text-center bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 border border-blue-200">
+            <div className="text-center bg-blue-50 rounded-lg p-4 border border-blue-200">
               <p className="text-2xl font-bold text-blue-700">
                 {new Set(filteredInspeksi.map(i => i.kategoriKendaraan)).size}
               </p>

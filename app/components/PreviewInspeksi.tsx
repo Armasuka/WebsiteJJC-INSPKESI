@@ -1,5 +1,13 @@
 import React from 'react';
 
+interface Komentar {
+  id: string;
+  namaPengirim: string;
+  rolePengirim: string;
+  isiKomentar: string;
+  createdAt: string;
+}
+
 interface PreviewInspeksiProps {
   inspeksi: {
     id: string;
@@ -16,6 +24,7 @@ interface PreviewInspeksiProps {
     ttdManagerOperasional?: string | null;
     approvedAtTraffic?: string | null;
     approvedAtOperational?: string | null;
+    komentar?: Komentar[];
   };
 }
 
@@ -53,16 +62,11 @@ export default function PreviewInspeksi({ inspeksi }: PreviewInspeksiProps) {
           "Toolkit Derek Lengkap",
         ],
         kendaraan: [
-          "STNK (Asli & Fotokopi)",
-          "KIR Kendaraan",
-          "Surat Izin Operasional",
-          "Buku Panduan Kendaraan",
           "Ban Serep",
           "Dongkrak & Kunci Roda",
           "Segitiga Pengaman",
           "Kotak P3K",
           "Toolkit/Perkakas Dasar",
-          "Dokumentasi Inspeksi Sebelumnya",
         ]
       },
       PLAZA: {
@@ -79,16 +83,11 @@ export default function PreviewInspeksi({ inspeksi }: PreviewInspeksiProps) {
           "Peralatan Kebersihan",
         ],
         kendaraan: [
-          "STNK (Asli & Fotokopi)",
-          "KIR Kendaraan",
-          "Surat Izin Operasional",
-          "Buku Panduan Kendaraan",
           "Ban Serep",
           "Dongkrak & Kunci Roda",
           "Segitiga Pengaman",
           "Kotak P3K",
           "Toolkit/Perkakas Dasar",
-          "Dokumentasi Inspeksi Sebelumnya",
         ]
       },
       KAMTIB: {
@@ -117,16 +116,11 @@ export default function PreviewInspeksi({ inspeksi }: PreviewInspeksiProps) {
           "Life Jacket/Pelampung",
         ],
         kendaraan: [
-          "STNK (Asli & Fotokopi)",
-          "KIR Kendaraan",
-          "Surat Izin Operasional",
-          "Buku Panduan Kendaraan",
           "Ban Serep",
           "Dongkrak & Kunci Roda",
           "Segitiga Pengaman",
           "Kotak P3K",
-          "Toolkit/Perkakas Dasar",
-          "Dokumentasi Inspeksi Sebelumnya",
+          "Toolkit/Perkakas Dasar"
         ]
       }
     };
@@ -138,13 +132,14 @@ export default function PreviewInspeksi({ inspeksi }: PreviewInspeksiProps) {
   const kendaraanList = getKelengkapanList(inspeksi.kategoriKendaraan, 'kendaraan');
 
   return (
-    <div className="bg-white rounded-lg shadow-2xl overflow-hidden">
-      <div className="border-2 border-black" style={{ fontFamily: 'Arial, sans-serif' }}>
+    <div className="bg-white" id="print-wrapper">
+      {/* Halaman 1 - Dengan Border */}
+      <div className="border-2 border-black halaman-1" style={{ fontFamily: 'Arial, sans-serif' }}>
         {/* Header dengan Logo */}
         <div className="border-b-2 border-black">
           <div className="flex items-center gap-6 p-6">
             <div className="flex-shrink-0">
-              <img src="/logo/logo_jjc.png" alt="Logo Jasamarga" className="w-32 h-32 object-contain" />
+              <img src="/logo/logo_jjc.png" alt="Logo Jasamarga" className="h-15 w-auto object-contain" />
             </div>
             <div className="flex-1">
               <h1 className="text-2xl font-bold text-black mb-2 uppercase">
@@ -264,7 +259,7 @@ export default function PreviewInspeksi({ inspeksi }: PreviewInspeksiProps) {
         {/* Kelengkapan Kendaraan */}
         {kendaraanList.length > 0 && (
           <>
-            <div className="bg-gray-200 border-b-2 border-black p-2 font-bold text-sm uppercase text-black">
+            <div className="bg-gray-200 border-t-2 border-b-2 border-black p-2 font-bold text-sm uppercase text-black">
               KELENGKAPAN KENDARAAN
             </div>
             {kendaraanList.map((item, index) => {
@@ -318,7 +313,10 @@ export default function PreviewInspeksi({ inspeksi }: PreviewInspeksiProps) {
                     <th className="border-r border-black p-2 font-bold text-black">STNK</th>
                     <th className="border-r border-black p-2 font-bold text-black">KIR</th>
                     <th className="border-r border-black p-2 font-bold text-black">SIM Operator 1</th>
-                    <th className="border-r border-black p-2 font-bold text-black">SIM Operator 2</th>
+                    {/* Hide SIM Operator 2 for RESCUE category (only 1 petugas) */}
+                    {inspeksi.kategoriKendaraan !== "RESCUE" && (
+                      <th className="border-r border-black p-2 font-bold text-black">SIM Operator 2</th>
+                    )}
                     <th className="border-r border-black p-2 font-bold text-black">Service</th>
                     <th className="p-2 font-bold text-black">BBM</th>
                   </tr>
@@ -334,9 +332,12 @@ export default function PreviewInspeksi({ inspeksi }: PreviewInspeksiProps) {
                     <td className="border-r border-black p-3 text-center text-black">
                       {dataKhusus.masaBerlakuSIMPetugas1 ? new Date(dataKhusus.masaBerlakuSIMPetugas1).toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }) : "-"}
                     </td>
-                    <td className="border-r border-black p-3 text-center text-black">
-                      {dataKhusus.masaBerlakuSIMPetugas2 ? new Date(dataKhusus.masaBerlakuSIMPetugas2).toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }) : "-"}
-                    </td>
+                    {/* Hide SIM Operator 2 for RESCUE category (only 1 petugas) */}
+                    {inspeksi.kategoriKendaraan !== "RESCUE" && (
+                      <td className="border-r border-black p-3 text-center text-black">
+                        {dataKhusus.masaBerlakuSIMPetugas2 ? new Date(dataKhusus.masaBerlakuSIMPetugas2).toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }) : "-"}
+                      </td>
+                    )}
                     <td className="border-r border-black p-3 text-center text-black">
                       {dataKhusus.tanggalService || dataKhusus.masaBerlakuService ? new Date(dataKhusus.tanggalService || dataKhusus.masaBerlakuService).toLocaleDateString('id-ID', { year: 'numeric', month: '2-digit', day: '2-digit' }) : "-"}
                     </td>
@@ -350,13 +351,146 @@ export default function PreviewInspeksi({ inspeksi }: PreviewInspeksiProps) {
           </>
         )}
 
-        {/* Lampiran Foto Dokumen - Multi-page (3 per halaman) */}
+        {/* NAMA PETUGAS */}
+        <div className="p-3 border-b-2 border-black">
+          <div className="font-bold text-xs mb-2 uppercase text-black">NAMA PETUGAS</div>
+          {inspeksi.kategoriKendaraan === "RESCUE" ? (
+            // RESCUE: Hanya 1 petugas
+            <div className="flex justify-start">
+              <div className="text-center" style={{ width: '200px' }}>
+                <div className="text-xs font-medium mb-1 text-black">Petugas Lapangan</div>
+                <div className="p-2 min-h-[60px] flex items-center justify-center mb-1">
+                  {ttdPetugas1 ? (
+                    <img src={ttdPetugas1} alt="TTD" className="max-h-16" />
+                  ) : (
+                    <span className="text-gray-400 text-xs italic">( Tanda tangan )</span>
+                  )}
+                </div>
+                <div className="border-t-2 border-black pt-1 font-bold text-xs text-black">
+                  {dataKhusus.namaPetugas1 || inspeksi.namaPetugas}
+                </div>
+                <div className="text-xs mt-1 text-black">NIP: {dataKhusus.nipPetugas1 || "-"}</div>
+              </div>
+            </div>
+          ) : (
+            // DEREK, PLAZA, KAMTIB: 2 petugas
+            <div className="grid grid-cols-2 gap-6">
+              <div className="text-center">
+                <div className="text-xs font-medium mb-1 text-black">Petugas 1</div>
+                <div className="p-2 min-h-[60px] flex items-center justify-center mb-1">
+                  {ttdPetugas1 ? (
+                    <img src={ttdPetugas1} alt="TTD Petugas 1" className="max-h-16" />
+                  ) : (
+                    <span className="text-gray-400 text-xs italic">( Tanda tangan )</span>
+                  )}
+                </div>
+                <div className="border-t-2 border-black pt-1 font-bold text-xs text-black">
+                  {dataKhusus.namaPetugas1 || inspeksi.namaPetugas}
+                </div>
+                <div className="text-xs mt-1 text-black">NIP: {dataKhusus.nipPetugas1 || inspeksi.nipPetugas || "-"}</div>
+              </div>
+
+              <div className="text-center">
+                <div className="text-xs font-medium mb-1 text-black">Petugas 2</div>
+                <div className="p-2 min-h-[60px] flex items-center justify-center mb-1">
+                  {ttdPetugas2 ? (
+                    <img src={ttdPetugas2} alt="TTD Petugas 2" className="max-h-16" />
+                  ) : (
+                    <span className="text-gray-400 text-xs italic">( Tanda tangan )</span>
+                  )}
+                </div>
+                <div className="border-t-2 border-black pt-1 font-bold text-xs text-black">
+                  {inspeksi.namaPetugas2 || dataKhusus.namaPetugas2 || "-"}
+                </div>
+                <div className="text-xs mt-1 text-black">NIP: {inspeksi.nipPetugas2 || dataKhusus.nipPetugas2 || "-"}</div>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Manager Approval */}
+        <div className="grid grid-cols-2">
+          <div className="border-r-2 border-black p-3 text-center">
+            <div className="text-xs mb-1 uppercase font-medium text-black">PT JMTO</div>
+            <div className="p-2 min-h-[60px] flex items-center justify-center mb-1">
+              {inspeksi.ttdManagerTraffic ? (
+                <img src={inspeksi.ttdManagerTraffic} alt="TTD Manager Traffic" className="max-h-14" />
+              ) : (
+                <span className="text-gray-400 text-xs italic">( Tanda tangan )</span>
+              )}
+            </div>
+            <div className="border-t-2 border-black pt-1 text-xs">
+              <div className="font-bold text-black">Manager Traffic</div>
+            </div>
+          </div>
+          <div className="p-3 text-center">
+            <div className="text-xs mb-1 uppercase font-medium text-black">PT JJC</div>
+            <div className="p-2 min-h-[60px] flex items-center justify-center mb-1">
+              {inspeksi.ttdManagerOperasional ? (
+                <img src={inspeksi.ttdManagerOperasional} alt="TTD Manager Ops" className="max-h-14" />
+              ) : (
+                <span className="text-gray-400 text-xs italic">( Tanda tangan )</span>
+              )}
+            </div>
+            <div className="border-t-2 border-black pt-1 text-xs">
+              <div className="font-bold text-black">Manager Operasional</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Section Komentar Manager */}
+        {inspeksi.komentar && inspeksi.komentar.length > 0 && (
+          <div className="border-t-2 border-black">
+            <div className="bg-gray-200 border-b-2 border-black p-2 font-bold text-sm uppercase text-black">
+              CATATAN / KOMENTAR MANAGER
+            </div>
+            <div className="p-4">
+              {inspeksi.komentar.map((komentar, index) => (
+                <div key={komentar.id} className={`mb-3 ${index !== inspeksi.komentar!.length - 1 ? 'border-b border-gray-300 pb-3' : ''}`}>
+                  <div className="flex items-start gap-2 mb-1">
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${
+                      komentar.rolePengirim === 'MANAGER_TRAFFIC' 
+                        ? 'bg-blue-100 text-blue-800' 
+                        : komentar.rolePengirim === 'MANAGER_OPERATIONAL'
+                        ? 'bg-green-100 text-green-800'
+                        : 'bg-gray-100 text-gray-800'
+                    }`}>
+                      {komentar.rolePengirim === 'MANAGER_TRAFFIC' 
+                        ? '🔵 Manager Traffic' 
+                        : komentar.rolePengirim === 'MANAGER_OPERATIONAL'
+                        ? '🟢 Manager Operasional'
+                        : 'Petugas'}
+                    </span>
+                    <span className="text-xs font-medium text-gray-900">{komentar.namaPengirim}</span>
+                    <span className="text-xs text-gray-500 ml-auto">
+                      {new Date(komentar.createdAt).toLocaleString('id-ID', { 
+                        day: '2-digit', 
+                        month: 'short', 
+                        year: 'numeric', 
+                        hour: '2-digit', 
+                        minute: '2-digit' 
+                      })}
+                    </span>
+                  </div>
+                  <div className="text-sm text-gray-800 bg-gray-50 p-2 rounded border border-gray-200">
+                    {komentar.isiKomentar}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      {/* Halaman 2+ - Lampiran Foto Dokumen (Tanpa Border) */}
+      <div className="lampiran-foto-section" style={{ fontFamily: 'Arial, sans-serif' }}>
         {(() => {
           const photos = [
             { label: 'STNK', file: dataKhusus.fotoSTNK },
             { label: 'KIR', file: dataKhusus.fotoKIR },
             { label: 'SIM Petugas 1', file: dataKhusus.fotoSIMPetugas1 },
-            { label: 'SIM Petugas 2', file: dataKhusus.fotoSIMPetugas2 },
+            // Hide SIM Petugas 2 for RESCUE category (only 1 petugas)
+            ...(inspeksi.kategoriKendaraan !== "RESCUE" ? [{ label: 'SIM Petugas 2', file: dataKhusus.fotoSIMPetugas2 }] : []),
             { label: 'Bukti Service', file: dataKhusus.fotoService },
             { label: 'BBM', file: dataKhusus.fotoBBM },
           ].filter(photo => photo.file);
@@ -375,18 +509,18 @@ export default function PreviewInspeksi({ inspeksi }: PreviewInspeksiProps) {
                 <span>LAMPIRAN FOTO DOKUMEN</span>
                 <span className="text-xs font-normal">Halaman {pageIndex + 1} dari {pages.length}</span>
               </div>
-              <div className="border-b-2 border-black p-6">
-                <div className="grid grid-cols-1 gap-6">
+              <div className="border-b-2 border-black p-4">
+                <div className="grid grid-cols-1 gap-4">
                   {pagePhotos.map((photo, idx) => (
-                    <div key={idx} className="border-2 border-gray-300 rounded-lg overflow-hidden bg-white">
-                      <div className="bg-gray-100 px-4 py-2 border-b-2 border-gray-300">
+                    <div key={idx} className="bg-white">
+                      <div className="bg-gray-100 px-3 py-1.5 border-b border-gray-300">
                         <p className="text-sm font-bold text-black">Foto {photo.label}</p>
                       </div>
-                      <div className="p-4 flex justify-center items-center bg-gray-50" style={{ minHeight: '300px' }}>
+                      <div className="p-2 flex justify-center items-center bg-gray-50">
                         <img 
                           src={photo.file} 
                           alt={photo.label} 
-                          className="max-w-full max-h-[400px] object-contain border border-gray-300 rounded shadow-lg" 
+                          className="max-w-full max-h-[400px] object-contain" 
                         />
                       </div>
                     </div>
@@ -396,103 +530,6 @@ export default function PreviewInspeksi({ inspeksi }: PreviewInspeksiProps) {
             </div>
           ));
         })()}
-
-        {/* NAMA PETUGAS */}
-        <div className="p-6 border-b-2 border-black">
-          <div className="font-bold text-sm mb-4 uppercase text-black">NAMA PETUGAS</div>
-          {inspeksi.kategoriKendaraan === "RESCUE" ? (
-            // RESCUE: Hanya 1 petugas
-            <div className="flex justify-start">
-              <div className="text-center" style={{ width: '300px' }}>
-                <div className="text-xs font-medium mb-2 text-black">Petugas Lapangan</div>
-                <div className="p-4 min-h-[100px] flex items-center justify-center mb-3">
-                  {ttdPetugas1 ? (
-                    <img src={ttdPetugas1} alt="TTD" className="max-h-20" />
-                  ) : (
-                    <span className="text-gray-400 text-xs italic">( Tanda tangan )</span>
-                  )}
-                </div>
-                <div className="border-t-2 border-black pt-2 font-bold text-black">
-                  {dataKhusus.namaPetugas1 || inspeksi.namaPetugas}
-                </div>
-                <div className="text-xs mt-1 text-black">NIP: {dataKhusus.nipPetugas1 || "-"}</div>
-              </div>
-            </div>
-          ) : (
-            // DEREK, PLAZA, KAMTIB: 2 petugas
-            <div className="grid grid-cols-2 gap-12">
-              <div className="text-center">
-                <div className="text-xs font-medium mb-2 text-black">Petugas 1</div>
-                <div className="p-4 min-h-[100px] flex items-center justify-center mb-3">
-                  {ttdPetugas1 ? (
-                    <img src={ttdPetugas1} alt="TTD Petugas 1" className="max-h-20" />
-                  ) : (
-                    <span className="text-gray-400 text-xs italic">( Tanda tangan )</span>
-                  )}
-                </div>
-                <div className="border-t-2 border-black pt-2 font-bold text-black">
-                  {dataKhusus.namaPetugas1 || inspeksi.namaPetugas}
-                </div>
-                <div className="text-xs mt-1 text-black">NIP: {dataKhusus.nipPetugas1 || inspeksi.nipPetugas || "-"}</div>
-              </div>
-
-              <div className="text-center">
-                <div className="text-xs font-medium mb-2 text-black">Petugas 2</div>
-                <div className="p-4 min-h-[100px] flex items-center justify-center mb-3">
-                  {ttdPetugas2 ? (
-                    <img src={ttdPetugas2} alt="TTD Petugas 2" className="max-h-20" />
-                  ) : (
-                    <span className="text-gray-400 text-xs italic">( Tanda tangan )</span>
-                  )}
-                </div>
-                <div className="border-t-2 border-black pt-2 font-bold text-black">
-                  {inspeksi.namaPetugas2 || dataKhusus.namaPetugas2 || "-"}
-                </div>
-                <div className="text-xs mt-1 text-black">NIP: {inspeksi.nipPetugas2 || dataKhusus.nipPetugas2 || "-"}</div>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Manager Approval */}
-        <div className="grid grid-cols-2 border-t-2 border-black">
-          <div className="border-r-2 border-black p-6 text-center">
-            <div className="text-xs mb-2 uppercase font-medium text-black">PT JMTO</div>
-            <div className="p-4 min-h-[80px] flex items-center justify-center mb-3">
-              {inspeksi.ttdManagerTraffic ? (
-                <img src={inspeksi.ttdManagerTraffic} alt="TTD Manager Traffic" className="max-h-16" />
-              ) : (
-                <span className="text-gray-400 text-xs italic">( Tanda tangan )</span>
-              )}
-            </div>
-            <div className="border-t-2 border-black pt-2 text-sm">
-              <div className="font-bold text-black">Manager Traffic</div>
-              {inspeksi.approvedAtTraffic && (
-                <div className="text-xs text-gray-600 mt-1">
-                  {new Date(inspeksi.approvedAtTraffic).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
-                </div>
-              )}
-            </div>
-          </div>
-          <div className="p-6 text-center">
-            <div className="text-xs mb-2 uppercase font-medium text-black">PT JJC</div>
-            <div className="p-4 min-h-[80px] flex items-center justify-center mb-3">
-              {inspeksi.ttdManagerOperasional ? (
-                <img src={inspeksi.ttdManagerOperasional} alt="TTD Manager Ops" className="max-h-16" />
-              ) : (
-                <span className="text-gray-400 text-xs italic">( Tanda tangan )</span>
-              )}
-            </div>
-            <div className="border-t-2 border-black pt-2 text-sm">
-              <div className="font-bold text-black">NIK</div>
-              {inspeksi.approvedAtOperational && (
-                <div className="text-xs text-gray-600 mt-1">
-                  {new Date(inspeksi.approvedAtOperational).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' })}
-                </div>
-              )}
-            </div>
-          </div>
-        </div>
       </div>
     </div>
   );

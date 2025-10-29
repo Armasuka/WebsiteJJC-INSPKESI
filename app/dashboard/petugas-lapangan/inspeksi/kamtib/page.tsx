@@ -62,7 +62,7 @@ export default function InspeksiKamtibPage() {
   const [hasSignature2, setHasSignature2] = useState(false);
 
   const [formData, setFormData] = useState<InspeksiForm>({
-    namaPetugas1: session?.user?.name || "",
+    namaPetugas1: "",
     nipPetugas1: "",
     namaPetugas2: "",
     nipPetugas2: "",
@@ -134,29 +134,19 @@ export default function InspeksiKamtibPage() {
 
   // Auto-save draft whenever formData or currentStep changes (localStorage only, no database)
   useEffect(() => {
-    const timer = setTimeout(async () => {
+    const timer = setTimeout(() => {
       if (formData.namaPetugas1 || formData.platNomor || currentStep > 1) {
         try {
+          // Save form data WITHOUT base64 images to avoid localStorage quota exceeded
           const formDataToSave = { ...formData };
-          // Convert File to base64, skip if already string or null
-          if (formData.fotoSTNK && typeof formData.fotoSTNK !== 'string' && formData.fotoSTNK instanceof File) {
-            formDataToSave.fotoSTNK = await uploadFile(formData.fotoSTNK);
-          }
-          if (formData.fotoKIR && typeof formData.fotoKIR !== 'string' && formData.fotoKIR instanceof File) {
-            formDataToSave.fotoKIR = await uploadFile(formData.fotoKIR);
-          }
-          if (formData.fotoSIMPetugas1 && typeof formData.fotoSIMPetugas1 !== 'string' && formData.fotoSIMPetugas1 instanceof File) {
-            formDataToSave.fotoSIMPetugas1 = await uploadFile(formData.fotoSIMPetugas1);
-          }
-          if (formData.fotoSIMPetugas2 && typeof formData.fotoSIMPetugas2 !== 'string' && formData.fotoSIMPetugas2 instanceof File) {
-            formDataToSave.fotoSIMPetugas2 = await uploadFile(formData.fotoSIMPetugas2);
-          }
-          if (formData.fotoService && typeof formData.fotoService !== 'string' && formData.fotoService instanceof File) {
-            formDataToSave.fotoService = await uploadFile(formData.fotoService);
-          }
-          if (formData.fotoBBM && typeof formData.fotoBBM !== 'string' && formData.fotoBBM instanceof File) {
-            formDataToSave.fotoBBM = await uploadFile(formData.fotoBBM);
-          }
+          // Remove base64 images from draft (they're too large for localStorage)
+          formDataToSave.fotoSTNK = null;
+          formDataToSave.fotoKIR = null;
+          formDataToSave.fotoSIMPetugas1 = null;
+          formDataToSave.fotoSIMPetugas2 = null;
+          formDataToSave.fotoService = null;
+          formDataToSave.fotoBBM = null;
+          formDataToSave.ttdPetugas1 = "";
           
           const draftData = { formData: formDataToSave, currentStep, timestamp: new Date().toISOString() };
           localStorage.setItem('draft_kamtib', JSON.stringify(draftData));
@@ -458,11 +448,11 @@ export default function InspeksiKamtibPage() {
 
   const uploadFile = async (file: File | string, customFileName?: string): Promise<string> => {
     try {
-      // Upload to MinIO and return URL
+      // Process file and return base64 string for database storage
       return await uploadFileToMinio(file, customFileName);
     } catch (error) {
-      console.error('Error uploading file:', error);
-      // Fallback: convert to base64 if MinIO upload fails
+      console.error('Error processing file:', error);
+      // Fallback: convert to base64
       if (typeof file === 'string') {
         return file;
       }
