@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
@@ -498,7 +498,7 @@ export default function InspeksiPlazaPage() {
     <div className="space-y-6">
       {/* Petugas 1 */}
       <div className="bg-blue-50 border-l-4 border-blue-700 p-4 rounded">
-        <h3 className="font-bold text-blue-800 mb-2">👤 Petugas 1 (Pengemudi)</h3>
+        <h3 className="font-bold text-blue-800 mb-2">Petugas 1 (Pengemudi)</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -531,7 +531,7 @@ export default function InspeksiPlazaPage() {
 
       {/* Petugas 2 */}
       <div className="bg-purple-50 border-l-4 border-purple-700 p-4 rounded">
-        <h3 className="font-bold text-purple-800 mb-2">👤 Petugas 2 (Pendamping)</h3>
+        <h3 className="font-bold text-purple-800 mb-2">Petugas 2 (Pendamping)</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -564,7 +564,7 @@ export default function InspeksiPlazaPage() {
 
       {/* Identitas Kendaraan */}
       <div className="bg-red-50 border-l-4 border-red-700 p-4 rounded">
-        <h3 className="font-bold text-red-800 mb-2">🚗 Identitas Kendaraan Plaza</h3>
+        <h3 className="font-bold text-red-800 mb-2">Identitas Kendaraan Plaza</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -575,7 +575,7 @@ export default function InspeksiPlazaPage() {
 
       {/* Lokasi Inspeksi */}
       <div className="bg-green-50 border-l-4 border-green-700 p-4 rounded">
-        <h3 className="font-bold text-green-800 mb-2">📍 Lokasi Inspeksi</h3>
+        <h3 className="font-bold text-green-800 mb-2">Lokasi Inspeksi</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="mb-4">
@@ -627,7 +627,7 @@ export default function InspeksiPlazaPage() {
               disabled={isGettingLocation}
               className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:bg-gray-400"
             >
-              {isGettingLocation ? "Mengambil..." : "📍 Ambil Lokasi GPS"}
+              {isGettingLocation ? "Mengambil..." : "Ambil Lokasi GPS"}
             </button>
           </div>
         </div>
@@ -639,7 +639,7 @@ export default function InspeksiPlazaPage() {
           onClick={nextStep}
           className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
         >
-          Lanjut ke Kelengkapan Sarana →
+          Lanjut ke Kelengkapan Sarana ?
         </button>
       </div>
     </div>
@@ -648,7 +648,7 @@ export default function InspeksiPlazaPage() {
   const renderStep2 = () => (
     <div className="space-y-6">
       <div className="bg-orange-50 border-l-4 border-orange-700 p-4 rounded">
-        <h3 className="font-bold text-orange-800 mb-2">🚦 Kelengkapan Sarana Plaza</h3>
+        <h3 className="font-bold text-orange-800 mb-2">Kelengkapan Sarana Plaza</h3>
         <p className="text-sm text-orange-700">
           Centang peralatan plaza, isi jumlah dan kondisinya
         </p>
@@ -696,7 +696,7 @@ export default function InspeksiPlazaPage() {
                               }}
                               className="w-10 h-10 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold text-lg flex items-center justify-center transition"
                             >
-                              −
+                              -
                             </button>
                             <input
                               type="number"
@@ -730,9 +730,9 @@ export default function InspeksiPlazaPage() {
                             }
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium"
                           >
-                            <option value="BAIK">✅ Baik</option>
-                            <option value="RUSAK_RINGAN">⚠️ Rusak Ringan</option>
-                            <option value="RUSAK_BERAT">❌ Rusak Berat</option>
+                            <option value="BAIK">Baik</option>
+                            <option value="RUSAK_RINGAN">Rusak Ringan</option>
+                            <option value="RUSAK_BERAT">Rusak Berat</option>
                           </select>
                         </div>
                       </div>
@@ -746,7 +746,7 @@ export default function InspeksiPlazaPage() {
       </div>
 
       <div className="bg-blue-50 border-l-4 border-blue-700 p-4 rounded">
-        <h3 className="font-bold text-blue-800 mb-2">🔧 Kelengkapan Kendaraan Umum</h3>
+        <h3 className="font-bold text-blue-800 mb-2">Kelengkapan Kendaraan Umum</h3>
         <p className="text-sm text-blue-700">
           Centang kelengkapan standar, isi jumlah dan kondisinya
         </p>
@@ -794,7 +794,7 @@ export default function InspeksiPlazaPage() {
                               }}
                               className="w-10 h-10 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold text-lg flex items-center justify-center transition"
                             >
-                              −
+                              -
                             </button>
                             <input
                               type="number"
@@ -828,9 +828,9 @@ export default function InspeksiPlazaPage() {
                             }
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium"
                           >
-                            <option value="BAIK">✅ Baik</option>
-                            <option value="RUSAK_RINGAN">⚠️ Rusak Ringan</option>
-                            <option value="RUSAK_BERAT">❌ Rusak Berat</option>
+                            <option value="BAIK">Baik</option>
+                            <option value="RUSAK_RINGAN">Rusak Ringan</option>
+                            <option value="RUSAK_BERAT">Rusak Berat</option>
                           </select>
                         </div>
                       </div>
@@ -849,14 +849,14 @@ export default function InspeksiPlazaPage() {
           onClick={prevStep}
           className="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition"
         >
-          ← Kembali
+          Kembali
         </button>
         <button
           type="button"
           onClick={nextStep}
           className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition"
         >
-          Lanjut ke Dokumen →
+          Lanjut ke Dokumen ?
         </button>
       </div>
     </div>
@@ -866,7 +866,7 @@ export default function InspeksiPlazaPage() {
   const renderStep3 = () => (
     <div className="space-y-6">
       <div className="bg-blue-50 border-l-4 border-blue-700 p-4 rounded">
-        <h3 className="font-bold text-blue-800 mb-2">📄 STNK</h3>
+        <h3 className="font-bold text-blue-800 mb-2"> STNK</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -892,7 +892,7 @@ export default function InspeksiPlazaPage() {
       </div>
 
       <div className="bg-green-50 border-l-4 border-green-700 p-4 rounded">
-        <h3 className="font-bold text-green-800 mb-2">📄 KIR</h3>
+        <h3 className="font-bold text-green-800 mb-2"> KIR</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -918,7 +918,7 @@ export default function InspeksiPlazaPage() {
       </div>
 
       <div className="bg-yellow-50 border-l-4 border-yellow-700 p-4 rounded">
-        <h3 className="font-bold text-yellow-800 mb-2">📄 SIM Petugas 1</h3>
+        <h3 className="font-bold text-yellow-800 mb-2"> SIM Petugas 1</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -944,7 +944,7 @@ export default function InspeksiPlazaPage() {
       </div>
 
       <div className="bg-purple-50 border-l-4 border-purple-700 p-4 rounded">
-        <h3 className="font-bold text-purple-800 mb-2">📄 SIM Petugas 2</h3>
+        <h3 className="font-bold text-purple-800 mb-2"> SIM Petugas 2</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -970,7 +970,7 @@ export default function InspeksiPlazaPage() {
       </div>
 
       <div className="bg-orange-50 border-l-4 border-orange-700 p-4 rounded">
-        <h3 className="font-bold text-orange-800 mb-2">🔧 Service Terakhir</h3>
+        <h3 className="font-bold text-orange-800 mb-2">Service Terakhir</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -996,7 +996,7 @@ export default function InspeksiPlazaPage() {
       </div>
 
       <div className="bg-red-50 border-l-4 border-red-700 p-4 rounded">
-        <h3 className="font-bold text-red-800 mb-2">⛽ BBM Terakhir</h3>
+        <h3 className="font-bold text-red-800 mb-2">BBM Terakhir</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -1022,8 +1022,8 @@ export default function InspeksiPlazaPage() {
       </div>
 
       <div className="flex justify-between">
-        <button type="button" onClick={prevStep} className="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition">← Kembali</button>
-        <button type="button" onClick={nextStep} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">Lanjut ke Tanda Tangan →</button>
+        <button type="button" onClick={prevStep} className="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition">Kembali</button>
+        <button type="button" onClick={nextStep} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">Lanjut ke Tanda Tangan</button>
       </div>
     </div>
   );
@@ -1033,7 +1033,7 @@ export default function InspeksiPlazaPage() {
     <div className="space-y-6">
       {/* Digital Signature */}
       <div className="bg-indigo-50 border-l-4 border-indigo-700 p-4 rounded">
-        <h3 className="font-bold text-indigo-800 mb-2">✍️ Tanda Tangan Digital Petugas 1</h3>
+        <h3 className="font-bold text-indigo-800 mb-2">Tanda Tangan Digital Petugas 1</h3>
         <p className="text-sm text-indigo-700">
           Tanda tangani di area canvas menggunakan mouse atau sentuhan
         </p>
@@ -1063,7 +1063,7 @@ export default function InspeksiPlazaPage() {
             onClick={clearSignature}
             className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition"
           >
-            🗑️ Hapus
+            Hapus
           </button>
           <button
             type="button"
@@ -1071,13 +1071,13 @@ export default function InspeksiPlazaPage() {
             disabled={!hasSignature}
             className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:bg-gray-400"
           >
-            💾 Simpan Tanda Tangan
+            Simpan Tanda Tangan
           </button>
         </div>
 
         {formData.ttdPetugas1 && (
           <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-green-800 font-medium mb-2">✓ Tanda tangan tersimpan</p>
+            <p className="text-green-800 font-medium mb-2">Tanda tangan tersimpan</p>
             <img src={formData.ttdPetugas1} alt="Signature" className="border border-gray-300 rounded max-w-xs text-black placeholder:text-gray-700 placeholder:font-medium" />
           </div>
         )}
@@ -1085,7 +1085,7 @@ export default function InspeksiPlazaPage() {
 
       {/* Digital Signature Petugas 2 */}
       <div className="bg-purple-50 border-l-4 border-purple-700 p-4 rounded">
-        <h3 className="font-bold text-purple-800 mb-2">✍️ Tanda Tangan Digital Petugas 2</h3>
+        <h3 className="font-bold text-purple-800 mb-2">Tanda Tangan Digital Petugas 2</h3>
         <p className="text-sm text-purple-700">Tanda tangani di area canvas menggunakan mouse atau sentuhan</p>
       </div>
 
@@ -1095,13 +1095,13 @@ export default function InspeksiPlazaPage() {
         </div>
 
         <div className="flex gap-3 justify-center">
-          <button type="button" onClick={clearSignature2} className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition">🗑️ Hapus</button>
-          <button type="button" onClick={saveSignature2} disabled={!hasSignature2} className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:bg-gray-400">💾 Simpan Tanda Tangan</button>
+          <button type="button" onClick={clearSignature2} className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition">Hapus</button>
+          <button type="button" onClick={saveSignature2} disabled={!hasSignature2} className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:bg-gray-400">Simpan Tanda Tangan</button>
         </div>
 
         {formData.ttdPetugas2 && (
           <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-green-800 font-medium mb-2">✓ Tanda tangan Petugas 2 tersimpan</p>
+            <p className="text-green-800 font-medium mb-2">Tanda tangan Petugas 2 tersimpan</p>
             <img src={formData.ttdPetugas2} alt="Signature 2" className="border border-gray-300 rounded max-w-xs" />
           </div>
         )}
@@ -1109,7 +1109,7 @@ export default function InspeksiPlazaPage() {
 
       {/* Summary */}
       <div className="bg-blue-50 border-l-4 border-blue-700 p-6 rounded">
-        <h4 className="font-bold text-blue-800 mb-3">📊 Ringkasan Inspeksi</h4>
+        <h4 className="font-bold text-blue-800 mb-3"> Ringkasan Inspeksi</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
           <div>
             <p className="text-gray-800 font-semibold">Petugas 1:</p>
@@ -1146,8 +1146,8 @@ export default function InspeksiPlazaPage() {
 
       {/* Action Buttons */}
       <div className="flex justify-between gap-4">
-        <button type="button" onClick={prevStep} className="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition">← Kembali</button>
-        <button type="button" onClick={() => setShowPreview(true)} disabled={loading || !formData.ttdPetugas1 || !formData.ttdPetugas2} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition disabled:bg-gray-400">👁️ Preview & Submit</button>
+        <button type="button" onClick={prevStep} className="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition">Kembali</button>
+        <button type="button" onClick={() => setShowPreview(true)} disabled={loading || !formData.ttdPetugas1 || !formData.ttdPetugas2} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition disabled:bg-gray-400">Preview & Submit</button>
       </div>
     </div>
   );
@@ -1239,16 +1239,16 @@ export default function InspeksiPlazaPage() {
                   <div className="col-span-5 p-2 border-r border-black text-black">{item}</div>
                   <div className="col-span-2 border-r border-black">
                     <div className="grid grid-cols-2 h-full">
-                      <div className="p-2 text-center border-r border-black flex items-center justify-center text-black">{data?.ada ? "✓" : ""}</div>
-                      <div className="p-2 text-center flex items-center justify-center text-black">{!data?.ada ? "✓" : ""}</div>
+                      <div className="p-2 text-center border-r border-black flex items-center justify-center text-black">{data?.ada ? "?" : ""}</div>
+                      <div className="p-2 text-center flex items-center justify-center text-black">{!data?.ada ? "?" : ""}</div>
                     </div>
                   </div>
                   <div className="col-span-1 p-2 text-center border-r border-black font-semibold text-black">{data?.ada ? data.jumlah : "-"}</div>
                   <div className="col-span-3">
                     <div className="grid grid-cols-3 h-full text-center">
-                      <div className="p-2 border-r border-black flex items-center justify-center text-black">{data?.ada && data?.kondisi === "BAIK" ? "✓" : ""}</div>
-                      <div className="p-2 border-r border-black flex items-center justify-center text-black">{data?.ada && data?.kondisi === "RUSAK_RINGAN" ? "✓" : ""}</div>
-                      <div className="p-2 flex items-center justify-center text-black">{data?.ada && data?.kondisi === "RUSAK_BERAT" ? "✓" : ""}</div>
+                      <div className="p-2 border-r border-black flex items-center justify-center text-black">{data?.ada && data?.kondisi === "BAIK" ? "?" : ""}</div>
+                      <div className="p-2 border-r border-black flex items-center justify-center text-black">{data?.ada && data?.kondisi === "RUSAK_RINGAN" ? "?" : ""}</div>
+                      <div className="p-2 flex items-center justify-center text-black">{data?.ada && data?.kondisi === "RUSAK_BERAT" ? "?" : ""}</div>
                     </div>
                   </div>
                 </div>
@@ -1264,16 +1264,16 @@ export default function InspeksiPlazaPage() {
                   <div className="col-span-5 p-2 border-r border-black text-black">{item}</div>
                   <div className="col-span-2 border-r border-black">
                     <div className="grid grid-cols-2 h-full">
-                      <div className="p-2 text-center border-r border-black flex items-center justify-center text-black">{data?.ada ? "✓" : ""}</div>
-                      <div className="p-2 text-center flex items-center justify-center text-black">{!data?.ada ? "✓" : ""}</div>
+                      <div className="p-2 text-center border-r border-black flex items-center justify-center text-black">{data?.ada ? "?" : ""}</div>
+                      <div className="p-2 text-center flex items-center justify-center text-black">{!data?.ada ? "?" : ""}</div>
                     </div>
                   </div>
                   <div className="col-span-1 p-2 text-center border-r border-black font-semibold text-black">{data?.ada ? data.jumlah : "-"}</div>
                   <div className="col-span-3">
                     <div className="grid grid-cols-3 h-full text-center">
-                      <div className="p-2 border-r border-black flex items-center justify-center text-black">{data?.ada && data?.kondisi === "BAIK" ? "✓" : ""}</div>
-                      <div className="p-2 border-r border-black flex items-center justify-center text-black">{data?.ada && data?.kondisi === "RUSAK_RINGAN" ? "✓" : ""}</div>
-                      <div className="p-2 flex items-center justify-center text-black">{data?.ada && data?.kondisi === "RUSAK_BERAT" ? "✓" : ""}</div>
+                      <div className="p-2 border-r border-black flex items-center justify-center text-black">{data?.ada && data?.kondisi === "BAIK" ? "?" : ""}</div>
+                      <div className="p-2 border-r border-black flex items-center justify-center text-black">{data?.ada && data?.kondisi === "RUSAK_RINGAN" ? "?" : ""}</div>
+                      <div className="p-2 flex items-center justify-center text-black">{data?.ada && data?.kondisi === "RUSAK_BERAT" ? "?" : ""}</div>
                     </div>
                   </div>
                 </div>
@@ -1409,7 +1409,7 @@ export default function InspeksiPlazaPage() {
         </div>
 
         <div className="border-t-2 border-gray-300 p-6 bg-gray-50 rounded-b-lg flex justify-between">
-          <button type="button" onClick={() => setShowPreview(false)} className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-semibold transition shadow">← KEMBALI</button>
+          <button type="button" onClick={() => setShowPreview(false)} className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-semibold transition shadow">KEMBALI</button>
           <button type="button" onClick={() => { setShowPreview(false); handleSubmit(); }} disabled={loading} className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition shadow disabled:bg-gray-400">{loading ? "MENGIRIM..." : "KIRIM KE MANAGER"}</button>
         </div>
       </div>
@@ -1432,7 +1432,7 @@ export default function InspeksiPlazaPage() {
                 }}
                 className="px-4 py-2 bg-red-500 hover:bg-red-600 text-white text-sm rounded-lg transition"
               >
-                🗑️ Hapus Draft
+                Hapus Draft
               </button>
             )}
           </div>
@@ -1442,7 +1442,7 @@ export default function InspeksiPlazaPage() {
           </p>
           {localStorage.getItem('draft_plaza') && (
             <div className="mt-2 bg-orange-500 bg-opacity-50 rounded px-3 py-2 text-sm">
-              📝 Draft tersimpan - Data sebelumnya sudah dimuat
+               Draft tersimpan - Data sebelumnya sudah dimuat
             </div>
           )}
         </div>
@@ -1461,7 +1461,7 @@ export default function InspeksiPlazaPage() {
                       : "bg-gray-200 text-gray-500"
                   }`}
                 >
-                  {currentStep > step ? "✓" : step}
+                  {currentStep > step ? "?" : step}
                 </div>
                 {step < 4 && (
                   <div

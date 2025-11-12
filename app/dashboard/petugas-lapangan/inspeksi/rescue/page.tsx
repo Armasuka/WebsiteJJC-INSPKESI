@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
@@ -410,7 +410,7 @@ export default function InspeksiRescuePage() {
   const renderStep1 = () => (
     <div className="space-y-6">
       <div className="bg-blue-50 border-l-4 border-blue-700 p-4 rounded">
-        <h3 className="font-bold text-blue-800 mb-2">👤 Petugas Lapangan</h3>
+        <h3 className="font-bold text-blue-800 mb-2">Petugas Lapangan</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -424,7 +424,7 @@ export default function InspeksiRescuePage() {
       </div>
 
       <div className="bg-red-50 border-l-4 border-red-700 p-4 rounded">
-        <h3 className="font-bold text-red-800 mb-2">🚒 Identitas Kendaraan Rescue</h3>
+        <h3 className="font-bold text-red-800 mb-2">Identitas Kendaraan Rescue</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -434,7 +434,7 @@ export default function InspeksiRescuePage() {
       </div>
 
       <div className="bg-green-50 border-l-4 border-green-700 p-4 rounded">
-        <h3 className="font-bold text-green-800 mb-2">📍 Lokasi Inspeksi</h3>
+        <h3 className="font-bold text-green-800 mb-2">Lokasi Inspeksi</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="mb-4">
@@ -452,7 +452,7 @@ export default function InspeksiRescuePage() {
           </div>
           <div className="flex items-end">
             <button type="button" onClick={getLocation} disabled={isGettingLocation} className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:bg-gray-400">
-              {isGettingLocation ? "Mengambil..." : "📍 Ambil Lokasi GPS"}
+              {isGettingLocation ? "Mengambil..." : "Ambil Lokasi GPS"}
             </button>
           </div>
         </div>
@@ -460,7 +460,7 @@ export default function InspeksiRescuePage() {
 
       <div className="flex justify-end">
         <button type="button" onClick={nextStep} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">
-          Lanjut ke Kelengkapan Sarana →
+          Lanjut ke Kelengkapan Sarana
         </button>
       </div>
     </div>
@@ -469,7 +469,7 @@ export default function InspeksiRescuePage() {
   const renderStep2 = () => (
     <div className="space-y-6">
       <div className="bg-red-50 border-l-4 border-red-700 p-4 rounded">
-        <h3 className="font-bold text-red-800 mb-2">🚒 Kelengkapan Sarana Rescue</h3>
+        <h3 className="font-bold text-red-800 mb-2">Kelengkapan Sarana Rescue</h3>
         <p className="text-sm text-red-700">Centang peralatan penyelamatan, isi jumlah dan kondisinya</p>
       </div>
 
@@ -488,7 +488,7 @@ export default function InspeksiRescuePage() {
                         <div>
                           <label className="block text-xs font-semibold text-gray-800 mb-1">Jumlah *</label>
                           <div className="flex items-center gap-2">
-                            <button type="button" onClick={() => { const currentJumlah = parseInt(itemData.jumlah) || 0; if (currentJumlah > 0) { handleKelengkapanChange("sarana", item, "jumlah", (currentJumlah - 1).toString()); }}} className="w-10 h-10 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold text-lg flex items-center justify-center transition">−</button>
+                            <button type="button" onClick={() => { const currentJumlah = parseInt(itemData.jumlah) || 0; if (currentJumlah > 0) { handleKelengkapanChange("sarana", item, "jumlah", (currentJumlah - 1).toString()); }}} className="w-10 h-10 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold text-lg flex items-center justify-center transition">-</button>
                             <input type="number" value={itemData.jumlah} onChange={(e) => handleKelengkapanChange("sarana", item, "jumlah", e.target.value)} className="flex-1 px-3 py-2 text-sm text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium" min="0" />
                             <button type="button" onClick={() => { const currentJumlah = parseInt(itemData.jumlah) || 0; handleKelengkapanChange("sarana", item, "jumlah", (currentJumlah + 1).toString()); }} className="w-10 h-10 bg-red-500 hover:bg-red-600 text-white rounded-lg font-bold text-lg flex items-center justify-center transition">+</button>
                           </div>
@@ -496,9 +496,9 @@ export default function InspeksiRescuePage() {
                         <div>
                           <label className="block text-xs font-semibold text-gray-800 mb-1">Kondisi *</label>
                           <select value={itemData.kondisi} onChange={(e) => handleKelengkapanChange("sarana", item, "kondisi", e.target.value)} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-black">
-                            <option value="BAIK">✅ Baik</option>
-                            <option value="RUSAK_RINGAN">⚠️ Rusak Ringan</option>
-                            <option value="RUSAK_BERAT">❌ Rusak Berat</option>
+                            <option value="BAIK">Baik</option>
+                            <option value="RUSAK_RINGAN">Rusak Ringan</option>
+                            <option value="RUSAK_BERAT">Rusak Berat</option>
                           </select>
                         </div>
                       </div>
@@ -512,7 +512,7 @@ export default function InspeksiRescuePage() {
       </div>
 
       <div className="bg-blue-50 border-l-4 border-blue-700 p-4 rounded">
-        <h3 className="font-bold text-blue-800 mb-2">🔧 Kelengkapan Kendaraan Umum</h3>
+        <h3 className="font-bold text-blue-800 mb-2">Kelengkapan Kendaraan Umum</h3>
         <p className="text-sm text-blue-700">Centang kelengkapan standar, isi jumlah dan kondisinya</p>
       </div>
 
@@ -531,7 +531,7 @@ export default function InspeksiRescuePage() {
                         <div>
                           <label className="block text-xs font-semibold text-gray-800 mb-1">Jumlah *</label>
                           <div className="flex items-center gap-2">
-                            <button type="button" onClick={() => { const currentJumlah = parseInt(itemData.jumlah) || 0; if (currentJumlah > 0) { handleKelengkapanChange("kendaraan", item, "jumlah", (currentJumlah - 1).toString()); }}} className="w-10 h-10 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold text-lg flex items-center justify-center transition">−</button>
+                            <button type="button" onClick={() => { const currentJumlah = parseInt(itemData.jumlah) || 0; if (currentJumlah > 0) { handleKelengkapanChange("kendaraan", item, "jumlah", (currentJumlah - 1).toString()); }}} className="w-10 h-10 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold text-lg flex items-center justify-center transition">-</button>
                             <input type="number" value={itemData.jumlah} onChange={(e) => handleKelengkapanChange("kendaraan", item, "jumlah", e.target.value)} className="flex-1 px-3 py-2 text-sm text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium" min="0" />
                             <button type="button" onClick={() => { const currentJumlah = parseInt(itemData.jumlah) || 0; handleKelengkapanChange("kendaraan", item, "jumlah", (currentJumlah + 1).toString()); }} className="w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-bold text-lg flex items-center justify-center transition">+</button>
                           </div>
@@ -539,9 +539,9 @@ export default function InspeksiRescuePage() {
                         <div>
                           <label className="block text-xs font-semibold text-gray-800 mb-1">Kondisi *</label>
                           <select value={itemData.kondisi} onChange={(e) => handleKelengkapanChange("kendaraan", item, "kondisi", e.target.value)} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black">
-                            <option value="BAIK">✅ Baik</option>
-                            <option value="RUSAK_RINGAN">⚠️ Rusak Ringan</option>
-                            <option value="RUSAK_BERAT">❌ Rusak Berat</option>
+                            <option value="BAIK">Baik</option>
+                            <option value="RUSAK_RINGAN">Rusak Ringan</option>
+                            <option value="RUSAK_BERAT">Rusak Berat</option>
                           </select>
                         </div>
                       </div>
@@ -555,8 +555,8 @@ export default function InspeksiRescuePage() {
       </div>
 
       <div className="flex justify-between">
-        <button type="button" onClick={prevStep} className="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition">← Kembali</button>
-        <button type="button" onClick={nextStep} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">Lanjut ke Dokumen →</button>
+        <button type="button" onClick={prevStep} className="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition">Kembali</button>
+        <button type="button" onClick={nextStep} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">Lanjut ke Dokumen</button>
       </div>
     </div>
   );
@@ -564,7 +564,7 @@ export default function InspeksiRescuePage() {
   const renderStep3 = () => (
     <div className="space-y-6">
       <div className="bg-blue-50 border-l-4 border-blue-700 p-4 rounded">
-        <h3 className="font-bold text-blue-800 mb-2">📄 STNK</h3>
+        <h3 className="font-bold text-blue-800 mb-2"> STNK</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -590,7 +590,7 @@ export default function InspeksiRescuePage() {
       </div>
 
       <div className="bg-green-50 border-l-4 border-green-700 p-4 rounded">
-        <h3 className="font-bold text-green-800 mb-2">📄 KIR</h3>
+        <h3 className="font-bold text-green-800 mb-2"> KIR</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -616,7 +616,7 @@ export default function InspeksiRescuePage() {
       </div>
 
       <div className="bg-yellow-50 border-l-4 border-yellow-700 p-4 rounded">
-        <h3 className="font-bold text-yellow-800 mb-2">📄 SIM Petugas</h3>
+        <h3 className="font-bold text-yellow-800 mb-2"> SIM Petugas</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -642,7 +642,7 @@ export default function InspeksiRescuePage() {
       </div>
 
       <div className="bg-orange-50 border-l-4 border-orange-700 p-4 rounded">
-        <h3 className="font-bold text-orange-800 mb-2">🔧 Service Terakhir</h3>
+        <h3 className="font-bold text-orange-800 mb-2">Service Terakhir</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -668,7 +668,7 @@ export default function InspeksiRescuePage() {
       </div>
 
       <div className="bg-cyan-50 border-l-4 border-cyan-700 p-4 rounded">
-        <h3 className="font-bold text-cyan-800 mb-2">⛽ BBM Terakhir</h3>
+        <h3 className="font-bold text-cyan-800 mb-2">BBM Terakhir</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -706,8 +706,8 @@ export default function InspeksiRescuePage() {
       </div>
 
       <div className="flex justify-between">
-        <button type="button" onClick={prevStep} className="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition">← Kembali</button>
-        <button type="button" onClick={nextStep} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">Lanjut ke Tanda Tangan →</button>
+        <button type="button" onClick={prevStep} className="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition">Kembali</button>
+        <button type="button" onClick={nextStep} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">Lanjut ke Tanda Tangan</button>
       </div>
     </div>
   );
@@ -715,7 +715,7 @@ export default function InspeksiRescuePage() {
   const renderStep4 = () => (
     <div className="space-y-6">
       <div className="bg-indigo-50 border-l-4 border-indigo-700 p-4 rounded">
-        <h3 className="font-bold text-indigo-800 mb-2">✍️ Tanda Tangan Digital Petugas</h3>
+        <h3 className="font-bold text-indigo-800 mb-2">Tanda Tangan Digital Petugas</h3>
         <p className="text-sm text-indigo-700">Tanda tangani di area canvas menggunakan mouse atau sentuhan</p>
       </div>
 
@@ -725,20 +725,20 @@ export default function InspeksiRescuePage() {
         </div>
 
         <div className="flex gap-3 justify-center">
-          <button type="button" onClick={clearSignature} className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition">🗑️ Hapus</button>
-          <button type="button" onClick={saveSignature} disabled={!hasSignature} className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:bg-gray-400">💾 Simpan Tanda Tangan</button>
+          <button type="button" onClick={clearSignature} className="px-6 py-2 bg-red-500 hover:bg-red-600 text-white rounded-lg font-medium transition">Hapus</button>
+          <button type="button" onClick={saveSignature} disabled={!hasSignature} className="px-6 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:bg-gray-400">Simpan Tanda Tangan</button>
         </div>
 
         {formData.ttdPetugas1 && (
           <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-lg">
-            <p className="text-green-800 font-medium mb-2">✓ Tanda tangan tersimpan</p>
+            <p className="text-green-800 font-medium mb-2">Tanda tangan tersimpan</p>
             <img src={formData.ttdPetugas1} alt="Signature" className="border border-gray-300 rounded max-w-xs text-black placeholder:text-gray-700 placeholder:font-medium" />
           </div>
         )}
       </div>
 
       <div className="bg-blue-50 border-l-4 border-blue-700 p-6 rounded">
-        <h4 className="font-bold text-blue-800 mb-3">📊 Ringkasan Inspeksi</h4>
+        <h4 className="font-bold text-blue-800 mb-3"> Ringkasan Inspeksi</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
           <div><p className="text-gray-800 font-semibold">Petugas 1:</p><p className="font-semibold text-gray-800">{formData.namaPetugas1}</p></div>
           <div><p className="text-gray-800 font-semibold">Plat Nomor:</p><p className="font-semibold text-gray-800">{formData.platNomor}</p></div>
@@ -750,8 +750,8 @@ export default function InspeksiRescuePage() {
       </div>
 
       <div className="flex justify-between gap-4">
-        <button type="button" onClick={prevStep} className="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition">← Kembali</button>
-        <button type="button" onClick={() => setShowPreview(true)} disabled={loading || !formData.ttdPetugas1} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition disabled:bg-gray-400">👁️ Preview & Submit</button>
+        <button type="button" onClick={prevStep} className="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition">Kembali</button>
+        <button type="button" onClick={() => setShowPreview(true)} disabled={loading || !formData.ttdPetugas1} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition disabled:bg-gray-400">Preview & Submit</button>
       </div>
     </div>
   );
@@ -856,10 +856,10 @@ export default function InspeksiRescuePage() {
                   <div className="col-span-2 border-r border-black">
                     <div className="grid grid-cols-2 h-full">
                       <div className="p-2 text-center border-r border-black flex items-center justify-center text-black">
-                        {data?.ada ? "✓" : ""}
+                        {data?.ada ? "?" : ""}
                       </div>
                       <div className="p-2 text-center flex items-center justify-center text-black">
-                        {!data?.ada ? "✓" : ""}
+                        {!data?.ada ? "?" : ""}
                       </div>
                     </div>
                   </div>
@@ -869,13 +869,13 @@ export default function InspeksiRescuePage() {
                   <div className="col-span-3">
                     <div className="grid grid-cols-3 h-full text-center">
                       <div className="p-2 border-r border-black flex items-center justify-center text-black">
-                        {data?.ada && data?.kondisi === "BAIK" ? "✓" : ""}
+                        {data?.ada && data?.kondisi === "BAIK" ? "?" : ""}
                       </div>
                       <div className="p-2 border-r border-black flex items-center justify-center text-black">
-                        {data?.ada && data?.kondisi === "RUSAK_RINGAN" ? "✓" : ""}
+                        {data?.ada && data?.kondisi === "RUSAK_RINGAN" ? "?" : ""}
                       </div>
                       <div className="p-2 flex items-center justify-center text-black">
-                        {data?.ada && data?.kondisi === "RUSAK_BERAT" ? "✓" : ""}
+                        {data?.ada && data?.kondisi === "RUSAK_BERAT" ? "?" : ""}
                       </div>
                     </div>
                   </div>
@@ -896,10 +896,10 @@ export default function InspeksiRescuePage() {
                   <div className="col-span-2 border-r border-black">
                     <div className="grid grid-cols-2 h-full">
                       <div className="p-2 text-center border-r border-black flex items-center justify-center text-black">
-                        {data?.ada ? "✓" : ""}
+                        {data?.ada ? "?" : ""}
                       </div>
                       <div className="p-2 text-center flex items-center justify-center text-black">
-                        {!data?.ada ? "✓" : ""}
+                        {!data?.ada ? "?" : ""}
                       </div>
                     </div>
                   </div>
@@ -909,13 +909,13 @@ export default function InspeksiRescuePage() {
                   <div className="col-span-3">
                     <div className="grid grid-cols-3 h-full text-center">
                       <div className="p-2 border-r border-black flex items-center justify-center text-black">
-                        {data?.ada && data?.kondisi === "BAIK" ? "✓" : ""}
+                        {data?.ada && data?.kondisi === "BAIK" ? "?" : ""}
                       </div>
                       <div className="p-2 border-r border-black flex items-center justify-center text-black">
-                        {data?.ada && data?.kondisi === "RUSAK_RINGAN" ? "✓" : ""}
+                        {data?.ada && data?.kondisi === "RUSAK_RINGAN" ? "?" : ""}
                       </div>
                       <div className="p-2 flex items-center justify-center text-black">
-                        {data?.ada && data?.kondisi === "RUSAK_BERAT" ? "✓" : ""}
+                        {data?.ada && data?.kondisi === "RUSAK_BERAT" ? "?" : ""}
                       </div>
                     </div>
                   </div>
@@ -1097,7 +1097,7 @@ export default function InspeksiRescuePage() {
             onClick={() => setShowPreview(false)}
             className="px-6 py-3 bg-gray-600 hover:bg-gray-700 text-white rounded-lg font-semibold transition shadow"
           >
-            ← KEMBALI
+            KEMBALI
           </button>
           <button 
             type="button" 
@@ -1130,7 +1130,7 @@ export default function InspeksiRescuePage() {
                 }}
                 className="px-4 py-2 bg-red-800 hover:bg-red-900 text-white text-sm rounded-lg transition"
               >
-                🗑️ Hapus Draft
+                Hapus Draft
               </button>
             )}
           </div>
@@ -1138,7 +1138,7 @@ export default function InspeksiRescuePage() {
           <p className="text-red-100">Isi formulir inspeksi untuk kendaraan tim penyelamatan</p>
           {localStorage.getItem('draft_rescue') && (
             <div className="mt-2 bg-red-500 bg-opacity-50 rounded px-3 py-2 text-sm">
-              📝 Draft tersimpan - Data sebelumnya sudah dimuat
+               Draft tersimpan - Data sebelumnya sudah dimuat
             </div>
           )}
         </div>
@@ -1147,7 +1147,7 @@ export default function InspeksiRescuePage() {
           <div className="flex items-center justify-between">
             {[1, 2, 3, 4].map((step) => (
               <div key={step} className="flex items-center">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition ${currentStep === step ? "bg-red-600 text-white" : currentStep > step ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"}`}>{currentStep > step ? "✓" : step}</div>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition ${currentStep === step ? "bg-red-600 text-white" : currentStep > step ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"}`}>{currentStep > step ? "?" : step}</div>
                 {step < 4 && <div className={`w-16 md:w-32 h-1 mx-2 transition ${currentStep > step ? "bg-green-500" : "bg-gray-200"}`} />}
               </div>
             ))}

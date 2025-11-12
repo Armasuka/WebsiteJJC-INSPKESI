@@ -55,6 +55,7 @@ export default function AnalyticsPage() {
   const [data, setData] = useState<AnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
   const [generating, setGenerating] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
 
   // Filters
   const [startDate, setStartDate] = useState("");
@@ -110,6 +111,15 @@ export default function AnalyticsPage() {
   };
 
   const handleGeneratePDF = async () => {
+    if (!contentRef.current || !data) return;
+    
+    // Show confirmation modal
+    setShowConfirmModal(true);
+  };
+
+  const confirmDownload = async () => {
+    setShowConfirmModal(false);
+    
     if (!contentRef.current || !data) return;
 
     try {
@@ -188,40 +198,157 @@ export default function AnalyticsPage() {
         element.style.borderColor = borderColor;
       });
 
+      // Load logo
+      const logoImg = new Image();
+      logoImg.src = "/logo/logo_jjc.png";
+      await new Promise((resolve, reject) => {
+        logoImg.onload = resolve;
+        logoImg.onerror = reject;
+      });
+
       const imgWidth = 210;
       const pageHeight = 297;
-      const imgHeight = (canvas.height * imgWidth) / canvas.width;
+      const headerHeight = 35; // Height for header/kop surat
+      const contentStartY = headerHeight + 5; // Start content after header with some margin
+      const availableHeight = pageHeight - contentStartY - 10; // Available height for content per page
+      
+      const scaledContentHeight = (canvas.height * imgWidth) / canvas.width;
 
       const pdf = new jsPDF("p", "mm", "a4");
       const imgData = canvas.toDataURL("image/jpeg", 0.95);
 
-      if (imgHeight <= pageHeight) {
-        pdf.addImage(imgData, "JPEG", 0, 0, imgWidth, imgHeight);
+      // Helper function to add header/kop surat
+      const addHeader = () => {
+        // Calculate logo dimensions with precise aspect ratio
+        const logoWidth = 35; // mm - slightly bigger
+        const logoHeight = logoWidth / (logoImg.width / logoImg.height);
+        const logoY = 12; // Move down from top (was 8)
+        
+        // Add logo on the left
+        pdf.addImage(logoImg, "PNG", 10, logoY, logoWidth, logoHeight);
+        
+        // Add company name and address in the center
+        pdf.setFontSize(14);
+        pdf.setFont("helvetica", "bold");
+        const companyName = "Jasa Marga Jalanlayang Cikampek";
+        const companyNameWidth = pdf.getTextWidth(companyName);
+        pdf.text(companyName, (imgWidth - companyNameWidth) / 2, 18);
+        
+        pdf.setFontSize(9);
+        pdf.setFont("helvetica", "normal");
+        const address = "Jl. Teuku Umar No.1, RT.002/RW.001, Sepanjang Jaya,";
+        const address2 = "Kec. Rawalumbu, Kota Bks, Jawa Barat 17114";
+        const addressWidth = pdf.getTextWidth(address);
+        const address2Width = pdf.getTextWidth(address2);
+        pdf.text(address, (imgWidth - addressWidth) / 2, 24);
+        pdf.text(address2, (imgWidth - address2Width) / 2, 29);
+        
+        // Add line separator
+        pdf.setLineWidth(0.5);
+        pdf.line(15, headerHeight, imgWidth - 15, headerHeight);
+      };
+
+      // Add first page with header
+      addHeader();
+
+      if (scaledContentHeight <= availableHeight) {
+        // Content fits in one page
+        pdf.addImage(imgData, "JPEG", 0, contentStartY, imgWidth, scaledContentHeight);
       } else {
-        let heightLeft = imgHeight;
-        let position = 0;
+        // Content spans multiple pages - need to split the canvas
+        const pageCanvas = document.createElement("canvas");
+        const pageCtx = pageCanvas.getContext("2d");
+        if (!pageCtx) throw new Error("Failed to get canvas context");
 
-        pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-        heightLeft -= pageHeight;
+        const pxPerMm = canvas.width / imgWidth;
+        const availableHeightPx = availableHeight * pxPerMm;
+        
+        pageCanvas.width = canvas.width;
+        pageCanvas.height = availableHeightPx;
 
-        while (heightLeft > 0) {
-          position = heightLeft - imgHeight;
-          pdf.addPage();
-          pdf.addImage(imgData, "JPEG", 0, position, imgWidth, imgHeight);
-          heightLeft -= pageHeight;
+        let srcY = 0;
+        let isFirstPage = true;
+
+        while (srcY < canvas.height) {
+          if (!isFirstPage) {
+            pdf.addPage();
+            addHeader();
+          }
+          isFirstPage = false;
+
+          const heightToCopy = Math.min(availableHeightPx, canvas.height - srcY);
+          pageCanvas.height = heightToCopy;
+          
+          // Clear canvas
+          pageCtx.clearRect(0, 0, pageCanvas.width, pageCanvas.height);
+          
+          // Copy portion of original canvas
+          pageCtx.drawImage(
+            canvas,
+            0, srcY, canvas.width, heightToCopy,
+            0, 0, canvas.width, heightToCopy
+          );
+
+          const pageImgData = pageCanvas.toDataURL("image/jpeg", 0.95);
+          const pageImgHeight = (heightToCopy * imgWidth) / canvas.width;
+          
+          pdf.addImage(pageImgData, "JPEG", 0, contentStartY, imgWidth, pageImgHeight);
+
+          srcY += availableHeightPx;
         }
       }
 
       const filename = `Analitik_Inspeksi_${new Date().getTime()}.pdf`;
       pdf.save(filename);
 
-      alert("✅ PDF berhasil diunduh!");
+      // Show success notification
+      setTimeout(() => {
+        const notification = document.createElement("div");
+        notification.className = "fixed top-4 right-4 bg-green-600 text-white px-6 py-4 rounded-lg shadow-2xl z-50 flex items-center gap-3 animate-slide-in";
+        notification.innerHTML = `
+          <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path>
+          </svg>
+          <div>
+            <p class="font-bold">Berhasil!</p>
+            <p class="text-sm">PDF telah berhasil diunduh</p>
+          </div>
+        `;
+        document.body.appendChild(notification);
+        
+        setTimeout(() => {
+          notification.style.animation = "slide-out 0.3s ease-out";
+          setTimeout(() => notification.remove(), 300);
+        }, 3000);
+      }, 100);
     } catch (error) {
       console.error("Error generating PDF:", error);
-      alert(`❌ Gagal membuat PDF: ${error instanceof Error ? error.message : "Unknown error"}`);
+      
+      // Show error notification
+      const notification = document.createElement("div");
+      notification.className = "fixed top-4 right-4 bg-red-600 text-white px-6 py-4 rounded-lg shadow-2xl z-50 flex items-center gap-3 animate-slide-in";
+      notification.innerHTML = `
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+        <div>
+          <p class="font-bold">Gagal!</p>
+          <p class="text-sm">Gagal membuat PDF: ${error instanceof Error ? error.message : "Unknown error"}</p>
+        </div>
+      `;
+      document.body.appendChild(notification);
+      
+      setTimeout(() => {
+        notification.style.animation = "slide-out 0.3s ease-out";
+        setTimeout(() => notification.remove(), 300);
+      }, 4000);
     } finally {
       setGenerating(false);
     }
+  };
+
+  const cancelDownload = () => {
+    setShowConfirmModal(false);
   };
 
   if (loading) {
@@ -568,6 +695,73 @@ export default function AnalyticsPage() {
           </div>
         </div>
       </div>
+
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 animate-fade-in">
+          <div className="bg-white rounded-2xl shadow-2xl max-w-md w-full mx-4 animate-scale-in">
+            <div className="p-6">
+              {/* Icon */}
+              <div className="flex justify-center mb-4">
+                <div className="bg-blue-100 rounded-full p-4">
+                  <svg
+                    className="w-12 h-12 text-blue-600"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                    />
+                  </svg>
+                </div>
+              </div>
+
+              {/* Title */}
+              <h3 className="text-2xl font-bold text-center text-gray-900 mb-2">
+                Download PDF?
+              </h3>
+
+              {/* Description */}
+              <p className="text-center text-gray-600 mb-6">
+                Apakah Anda yakin ingin mengunduh laporan analitik inspeksi dalam format PDF?
+              </p>
+
+              {/* Buttons */}
+              <div className="flex gap-3">
+                <button
+                  onClick={cancelDownload}
+                  className="flex-1 px-6 py-3 bg-gray-200 hover:bg-gray-300 text-gray-800 font-semibold rounded-lg transition-colors duration-200"
+                >
+                  Batal
+                </button>
+                <button
+                  onClick={confirmDownload}
+                  className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white font-semibold rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                >
+                  <svg
+                    className="w-5 h-5"
+                    fill="none"
+                    stroke="currentColor"
+                    viewBox="0 0 24 24"
+                  >
+                    <path
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth={2}
+                      d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
+                    />
+                  </svg>
+                  Ya, Download
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

@@ -510,7 +510,7 @@ export default function InspeksiDerekPage() {
     <div className="space-y-6">
       {/* Petugas 1 */}
       <div className="bg-blue-50 border-l-4 border-blue-700 p-4 rounded">
-        <h3 className="font-bold text-blue-800 mb-2">👤 Petugas 1 (Pengemudi)</h3>
+        <h3 className="font-bold text-blue-800 mb-2">Petugas 1 (Pengemudi)</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -543,7 +543,7 @@ export default function InspeksiDerekPage() {
 
       {/* Petugas 2 */}
       <div className="bg-purple-50 border-l-4 border-purple-700 p-4 rounded">
-        <h3 className="font-bold text-purple-800 mb-2">👤 Petugas 2 (Pendamping)</h3>
+        <h3 className="font-bold text-purple-800 mb-2">Petugas 2 (Pendamping)</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -576,7 +576,7 @@ export default function InspeksiDerekPage() {
 
       {/* Identitas Kendaraan */}
       <div className="bg-red-50 border-l-4 border-red-700 p-4 rounded">
-        <h3 className="font-bold text-red-800 mb-2">🚛 Identitas Kendaraan Derek</h3>
+        <h3 className="font-bold text-red-800 mb-2">Identitas Kendaraan Derek</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -587,7 +587,7 @@ export default function InspeksiDerekPage() {
 
       {/* Lokasi Inspeksi */}
       <div className="bg-green-50 border-l-4 border-green-700 p-4 rounded">
-        <h3 className="font-bold text-green-800 mb-2">📍 Lokasi Inspeksi</h3>
+        <h3 className="font-bold text-green-800 mb-2">Lokasi Inspeksi</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="mb-4">
@@ -639,7 +639,7 @@ export default function InspeksiDerekPage() {
               disabled={isGettingLocation}
               className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:bg-gray-400"
             >
-              {isGettingLocation ? "Mengambil..." : "📍 Ambil Lokasi GPS"}
+              {isGettingLocation ? "Mengambil..." : "Ambil Lokasi GPS"}
             </button>
           </div>
         </div>
@@ -660,7 +660,7 @@ export default function InspeksiDerekPage() {
   const renderStep2 = () => (
     <div className="space-y-6">
       <div className="bg-yellow-50 border-l-4 border-yellow-700 p-4 rounded">
-        <h3 className="font-bold text-yellow-800 mb-2">🚛 Kelengkapan Sarana Derek</h3>
+        <h3 className="font-bold text-yellow-800 mb-2">Kelengkapan Sarana Derek</h3>
         <p className="text-sm text-yellow-700">
           Centang peralatan derek, isi jumlah dan kondisinya
         </p>
@@ -742,9 +742,9 @@ export default function InspeksiDerekPage() {
                             }
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-black"
                           >
-                            <option value="BAIK">✅ Baik</option>
-                            <option value="RUSAK_RINGAN">⚠️ Rusak Ringan</option>
-                            <option value="RUSAK_BERAT">❌ Rusak Berat</option>
+                            <option value="BAIK">Baik</option>
+                            <option value="RUSAK_RINGAN">Rusak Ringan</option>
+                            <option value="RUSAK_BERAT">Rusak Berat</option>
                           </select>
                         </div>
                       </div>
@@ -758,7 +758,7 @@ export default function InspeksiDerekPage() {
       </div>
 
       <div className="bg-blue-50 border-l-4 border-blue-700 p-4 rounded">
-        <h3 className="font-bold text-blue-800 mb-2">🔧 Kelengkapan Kendaraan Umum</h3>
+        <h3 className="font-bold text-blue-800 mb-2">Kelengkapan Kendaraan Umum</h3>
         <p className="text-sm text-blue-700">
           Centang kelengkapan standar, isi jumlah dan kondisinya
         </p>
@@ -840,9 +840,9 @@ export default function InspeksiDerekPage() {
                             }
                             className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black"
                           >
-                            <option value="BAIK">✅ Baik</option>
-                            <option value="RUSAK_RINGAN">⚠️ Rusak Ringan</option>
-                            <option value="RUSAK_BERAT">❌ Rusak Berat</option>
+                            <option value="BAIK">Baik</option>
+                            <option value="RUSAK_RINGAN">Rusak Ringan</option>
+                            <option value="RUSAK_BERAT">Rusak Berat</option>
                           </select>
                         </div>
                       </div>
@@ -879,7 +879,7 @@ export default function InspeksiDerekPage() {
     <div className="space-y-6">
       {/* STNK */}
       <div className="bg-blue-50 border-l-4 border-blue-700 p-4 rounded">
-        <h3 className="font-bold text-blue-800 mb-2">📄 STNK</h3>
+        <h3 className="font-bold text-blue-800 mb-2"> STNK</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -917,7 +917,7 @@ export default function InspeksiDerekPage() {
 
       {/* KIR */}
       <div className="bg-green-50 border-l-4 border-green-700 p-4 rounded">
-        <h3 className="font-bold text-green-800 mb-2">📄 KIR</h3>
+        <h3 className="font-bold text-green-800 mb-2"> KIR</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -955,7 +955,7 @@ export default function InspeksiDerekPage() {
 
       {/* SIM Petugas 1 */}
       <div className="bg-yellow-50 border-l-4 border-yellow-700 p-4 rounded">
-        <h3 className="font-bold text-yellow-800 mb-2">📄 SIM Petugas 1</h3>
+        <h3 className="font-bold text-yellow-800 mb-2"> SIM Petugas 1</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -993,7 +993,7 @@ export default function InspeksiDerekPage() {
 
       {/* SIM Petugas 2 */}
       <div className="bg-purple-50 border-l-4 border-purple-700 p-4 rounded">
-        <h3 className="font-bold text-purple-800 mb-2">📄 SIM Petugas 2</h3>
+        <h3 className="font-bold text-purple-800 mb-2"> SIM Petugas 2</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -1031,7 +1031,7 @@ export default function InspeksiDerekPage() {
 
       {/* Service */}
       <div className="bg-indigo-50 border-l-4 border-indigo-700 p-4 rounded">
-        <h3 className="font-bold text-indigo-800 mb-2">🔧 Service Terakhir</h3>
+        <h3 className="font-bold text-indigo-800 mb-2">Service Terakhir</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -1069,7 +1069,7 @@ export default function InspeksiDerekPage() {
 
       {/* BBM */}
       <div className="bg-red-50 border-l-4 border-red-700 p-4 rounded">
-        <h3 className="font-bold text-red-800 mb-2">⛽ BBM</h3>
+        <h3 className="font-bold text-red-800 mb-2">BBM</h3>
       </div>
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
@@ -1130,7 +1130,7 @@ export default function InspeksiDerekPage() {
     <div className="space-y-6">
       {/* Digital Signature Petugas 1 */}
       <div className="bg-indigo-50 border-l-4 border-indigo-700 p-4 rounded">
-        <h3 className="font-bold text-indigo-800 mb-2">✍️ Tanda Tangan Digital Petugas 1</h3>
+        <h3 className="font-bold text-indigo-800 mb-2">Tanda Tangan Digital Petugas 1</h3>
         <p className="text-sm text-indigo-700">
           Tanda tangani di area canvas menggunakan mouse atau sentuhan
         </p>
@@ -1182,7 +1182,7 @@ export default function InspeksiDerekPage() {
 
       {/* Digital Signature Petugas 2 */}
       <div className="bg-purple-50 border-l-4 border-purple-700 p-4 rounded">
-        <h3 className="font-bold text-purple-800 mb-2">✍️ Tanda Tangan Digital Petugas 2</h3>
+        <h3 className="font-bold text-purple-800 mb-2">Tanda Tangan Digital Petugas 2</h3>
         <p className="text-sm text-purple-700">
           Tanda tangani di area canvas menggunakan mouse atau sentuhan
         </p>
@@ -1231,7 +1231,7 @@ export default function InspeksiDerekPage() {
 
       {/* Summary */}
       <div className="bg-blue-50 border-l-4 border-blue-700 p-6 rounded">
-        <h4 className="font-bold text-blue-800 mb-3">📊 Ringkasan Inspeksi</h4>
+        <h4 className="font-bold text-blue-800 mb-3"> Ringkasan Inspeksi</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
           <div>
             <p className="text-gray-800 font-semibold">Petugas 1:</p>
@@ -1677,7 +1677,7 @@ export default function InspeksiDerekPage() {
           </p>
           {localStorage.getItem('draft_derek') && (
             <div className="mt-2 bg-yellow-500 bg-opacity-50 rounded px-3 py-2 text-sm">
-              📝 Draft tersimpan - Data sebelumnya sudah dimuat
+               Draft tersimpan - Data sebelumnya sudah dimuat
             </div>
           )}
         </div>
