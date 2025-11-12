@@ -19,8 +19,10 @@ export default function ManageUsersPage() {
   const [users, setUsers] = useState<User[]>([]);
   const [loading, setLoading] = useState(true);
   const [showModal, setShowModal] = useState(false);
+  const [showEditModal, setShowEditModal] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedUser, setSelectedUser] = useState<User | null>(null);
   
   // Form state
   const [formData, setFormData] = useState({
@@ -28,6 +30,11 @@ export default function ManageUsersPage() {
     email: "",
     password: "",
     confirmPassword: "",
+  });
+
+  // Edit form state
+  const [editFormData, setEditFormData] = useState({
+    role: "",
   });
 
   // Toast notification state
@@ -51,9 +58,9 @@ export default function ManageUsersPage() {
       const response = await fetch("/api/users");
       if (response.ok) {
         const data = await response.json();
-        setUsers(data.filter((user: User) => user.role === "PETUGAS_LAPANGAN"));
+        setUsers(data);
       } else {
-        showToast("Gagal memuat data petugas", "error");
+        showToast("Gagal memuat data user", "error");
       }
     } catch (error) {
       console.error("Error fetching users:", error);
@@ -131,7 +138,7 @@ export default function ManageUsersPage() {
       });
 
       if (response.ok) {
-        showToast("Akun petugas berhasil dihapus", "success");
+        showToast("Akun user berhasil dihapus", "success");
         fetchUsers();
       } else {
         const data = await response.json();
@@ -141,6 +148,54 @@ export default function ManageUsersPage() {
       console.error("Error deleting user:", error);
       showToast("Terjadi kesalahan saat menghapus akun", "error");
     }
+  };
+
+  const handleEditClick = (user: User) => {
+    setSelectedUser(user);
+    setEditFormData({ role: user.role });
+    setShowEditModal(true);
+  };
+
+  const handleEditSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+
+    if (!selectedUser) return;
+
+    try {
+      setSubmitting(true);
+      const response = await fetch(`/api/users/${selectedUser.id}`, {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          role: editFormData.role,
+        }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        showToast("Jabatan user berhasil diubah!", "success");
+        setShowEditModal(false);
+        setSelectedUser(null);
+        fetchUsers();
+      } else {
+        showToast(data.error || "Gagal mengubah jabatan", "error");
+      }
+    } catch (error) {
+      console.error("Error updating user:", error);
+      showToast("Terjadi kesalahan saat mengubah jabatan", "error");
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  const getRoleDisplay = (role: string) => {
+    const roles: Record<string, string> = {
+      MANAGER_TRAFFIC: "Manager Traffic",
+      MANAGER_OPERATIONAL: "Manager Operational",
+      PETUGAS_LAPANGAN: "Petugas Lapangan",
+    };
+    return roles[role] || role;
   };
 
   const filteredUsers = users.filter((user) =>
@@ -166,8 +221,8 @@ export default function ManageUsersPage() {
       <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6 animate-fade-blur-in" style={{ animationDelay: '0.1s', animationFillMode: 'both' }}>
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-gray-900">Manajemen Akun Petugas</h1>
-            <p className="text-gray-600 mt-1">Kelola akun petugas lapangan</p>
+            <h1 className="text-2xl font-bold text-gray-900">Manajemen Akun User</h1>
+            <p className="text-gray-600 mt-1">Kelola semua akun user dan jabatan</p>
           </div>
           <button
             onClick={() => setShowModal(true)}
@@ -176,7 +231,7 @@ export default function ManageUsersPage() {
             <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
               <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
             </svg>
-            Tambah Petugas
+            Tambah User
           </button>
         </div>
       </div>
@@ -188,7 +243,7 @@ export default function ManageUsersPage() {
             type="text"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
-            placeholder="Cari nama atau email petugas..."
+            placeholder="Cari nama atau email user..."
             className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
           />
           <svg
@@ -215,6 +270,9 @@ export default function ManageUsersPage() {
                   Email
                 </th>
                 <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
+                  Jabatan
+                </th>
+                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase tracking-wider">
                   Dibuat Pada
                 </th>
                 <th className="px-6 py-4 text-center text-xs font-semibold text-gray-600 uppercase tracking-wider">
@@ -225,7 +283,7 @@ export default function ManageUsersPage() {
             <tbody className="divide-y divide-gray-200">
               {loading ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center">
+                  <td colSpan={5} className="px-6 py-12 text-center">
                     <div className="flex items-center justify-center">
                       <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
                       <span className="ml-3 text-gray-600">Memuat data...</span>
@@ -234,12 +292,12 @@ export default function ManageUsersPage() {
                 </tr>
               ) : filteredUsers.length === 0 ? (
                 <tr>
-                  <td colSpan={4} className="px-6 py-12 text-center">
+                  <td colSpan={5} className="px-6 py-12 text-center">
                     <svg className="w-16 h-16 text-gray-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                       <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
                     </svg>
-                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Belum Ada Petugas</h3>
-                    <p className="text-gray-600">Klik tombol "Tambah Petugas" untuk menambahkan akun baru</p>
+                    <h3 className="text-lg font-semibold text-gray-900 mb-2">Belum Ada User</h3>
+                    <p className="text-gray-600">Klik tombol "Tambah User" untuk menambahkan akun baru</p>
                   </td>
                 </tr>
               ) : (
@@ -248,18 +306,28 @@ export default function ManageUsersPage() {
                     <td className="px-6 py-4">
                       <div className="flex items-center gap-3">
                         <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center">
-                          <svg className="w-5 h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                            <path fillRule="evenodd" d="M10 9a3 3 0 100-6 3 3 0 000 6zm-7 9a7 7 0 1114 0H3z" clipRule="evenodd" />
-                          </svg>
+                          <span className="text-blue-600 font-bold text-sm">
+                            {user.name.charAt(0).toUpperCase()}
+                          </span>
                         </div>
                         <div>
                           <p className="font-semibold text-gray-900">{user.name}</p>
-                          <p className="text-sm text-gray-500">Petugas Lapangan</p>
                         </div>
                       </div>
                     </td>
                     <td className="px-6 py-4">
                       <p className="text-gray-900">{user.email}</p>
+                    </td>
+                    <td className="px-6 py-4">
+                      <span className={`inline-flex items-center px-3 py-1 rounded-full text-xs font-medium ${
+                        user.role === "MANAGER_OPERATIONAL" 
+                          ? "bg-purple-100 text-purple-800"
+                          : user.role === "MANAGER_TRAFFIC"
+                          ? "bg-green-100 text-green-800"
+                          : "bg-blue-100 text-blue-800"
+                      }`}>
+                        {getRoleDisplay(user.role)}
+                      </span>
                     </td>
                     <td className="px-6 py-4">
                       <p className="text-gray-900">
@@ -270,13 +338,22 @@ export default function ManageUsersPage() {
                         })}
                       </p>
                     </td>
-                    <td className="px-6 py-4 text-center">
-                      <button
-                        onClick={() => handleDelete(user.id, user.name)}
-                        className="text-red-600 hover:text-red-700 font-semibold transition-colors"
-                      >
-                        Hapus
-                      </button>
+                    <td className="px-6 py-4">
+                      <div className="flex items-center justify-center gap-2">
+                        <button
+                          onClick={() => handleEditClick(user)}
+                          className="text-blue-600 hover:text-blue-700 font-semibold transition-colors"
+                        >
+                          Edit
+                        </button>
+                        <span className="text-gray-300">|</span>
+                        <button
+                          onClick={() => handleDelete(user.id, user.name)}
+                          className="text-red-600 hover:text-red-700 font-semibold transition-colors"
+                        >
+                          Hapus
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -291,7 +368,7 @@ export default function ManageUsersPage() {
         <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in">
           <div className="bg-white rounded-xl shadow-xl max-w-md w-full max-h-[90vh] overflow-y-auto animate-fade-blur-in">
             <div className="bg-blue-600 px-6 py-4 rounded-t-xl">
-              <h2 className="text-xl font-bold text-white">Tambah Akun Petugas Baru</h2>
+              <h2 className="text-xl font-bold text-white">Tambah Akun User Baru</h2>
             </div>
             
             <form onSubmit={handleSubmit} className="p-6 space-y-4">
@@ -393,6 +470,90 @@ export default function ManageUsersPage() {
                   disabled={submitting}
                 >
                   {submitting ? "Menyimpan..." : "Simpan"}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
+
+      {/* Edit User Role Modal */}
+      {showEditModal && selectedUser && (
+        <div className="fixed inset-0 bg-black/30 backdrop-blur-md flex items-center justify-center z-50 p-4 animate-fade-in">
+          <div className="bg-white rounded-xl shadow-xl max-w-md w-full animate-fade-blur-in">
+            <div className="bg-green-600 px-6 py-4 rounded-t-xl">
+              <h2 className="text-xl font-bold text-white">Edit Jabatan User</h2>
+            </div>
+            
+            <form onSubmit={handleEditSubmit} className="p-6 space-y-4">
+              {/* User Info */}
+              <div className="bg-gray-50 rounded-lg p-4 border border-gray-200">
+                <div className="flex items-center gap-3 mb-3">
+                  <div className="w-12 h-12 bg-blue-100 rounded-full flex items-center justify-center">
+                    <span className="text-blue-600 font-bold text-lg">
+                      {selectedUser.name.charAt(0).toUpperCase()}
+                    </span>
+                  </div>
+                  <div>
+                    <p className="font-semibold text-gray-900">{selectedUser.name}</p>
+                    <p className="text-sm text-gray-600">{selectedUser.email}</p>
+                  </div>
+                </div>
+                <div className="text-sm text-gray-600">
+                  <p><span className="font-medium">Jabatan Saat Ini:</span> {getRoleDisplay(selectedUser.role)}</p>
+                </div>
+              </div>
+
+              {/* Role Selection */}
+              <div>
+                <label className="block text-sm font-semibold text-gray-700 mb-2">
+                  Jabatan Baru *
+                </label>
+                <select
+                  value={editFormData.role}
+                  onChange={(e) => setEditFormData({ role: e.target.value })}
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-green-500"
+                  required
+                >
+                  <option value="">Pilih Jabatan</option>
+                  <option value="PETUGAS_LAPANGAN">Petugas Lapangan</option>
+                  <option value="MANAGER_TRAFFIC">Manager Traffic</option>
+                  <option value="MANAGER_OPERATIONAL">Manager Operational</option>
+                </select>
+              </div>
+
+              {/* Warning */}
+              <div className="bg-yellow-50 border border-yellow-200 rounded-lg p-4">
+                <div className="flex gap-2">
+                  <svg className="w-5 h-5 text-yellow-600 flex-shrink-0 mt-0.5" fill="currentColor" viewBox="0 0 20 20">
+                    <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+                  </svg>
+                  <div className="text-sm text-yellow-800">
+                    <p className="font-semibold mb-1">Perhatian!</p>
+                    <p>Perubahan jabatan akan mempengaruhi hak akses user. Pastikan Anda sudah memilih jabatan yang tepat.</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowEditModal(false);
+                    setSelectedUser(null);
+                  }}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-colors"
+                  disabled={submitting}
+                >
+                  Batal
+                </button>
+                <button
+                  type="submit"
+                  className="flex-1 px-4 py-2 bg-green-600 text-white rounded-lg font-semibold hover:bg-green-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  disabled={submitting}
+                >
+                  {submitting ? "Menyimpan..." : "Simpan Perubahan"}
                 </button>
               </div>
             </form>

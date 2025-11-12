@@ -393,21 +393,26 @@ export default function DashboardLayout({
         {/* User Info at Bottom - FLEX-SHRINK-0 agar tidak hilang */}
         {sidebarOpen && (
           <div className="p-3 sm:p-4 border-t border-gray-200 flex-shrink-0 bg-white">
-            <div className="bg-gray-50 rounded-lg p-2.5 sm:p-3">
-              <div className="flex items-center gap-2 sm:gap-3">
-                <div className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm shadow-sm flex-shrink-0">
-                  {session?.user?.name?.charAt(0).toUpperCase()}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <p className="font-semibold text-xs sm:text-sm text-gray-900 truncate">
-                    {session?.user?.name}
-                  </p>
-                  <p className="text-[10px] sm:text-xs text-gray-500 truncate">
-                    {getRoleDisplay(userRole)}
-                  </p>
+            <Link href="/dashboard/profile">
+              <div className="bg-gray-50 rounded-lg p-2.5 sm:p-3 hover:bg-blue-50 transition-colors cursor-pointer group">
+                <div className="flex items-center gap-2 sm:gap-3">
+                  <div className="w-9 h-9 sm:w-10 sm:h-10 bg-blue-600 rounded-full flex items-center justify-center text-white font-bold text-xs sm:text-sm shadow-sm flex-shrink-0 group-hover:bg-blue-700 transition-colors">
+                    {session?.user?.name?.charAt(0).toUpperCase()}
+                  </div>
+                  <div className="flex-1 min-w-0">
+                    <p className="font-semibold text-xs sm:text-sm text-gray-900 truncate group-hover:text-blue-600 transition-colors">
+                      {session?.user?.name}
+                    </p>
+                    <p className="text-[10px] sm:text-xs text-gray-500 truncate">
+                      {getRoleDisplay(userRole)}
+                    </p>
+                  </div>
+                  <svg className="w-4 h-4 text-gray-400 group-hover:text-blue-600 transition-colors flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                  </svg>
                 </div>
               </div>
-            </div>
+            </Link>
           </div>
         )}
       </aside>
