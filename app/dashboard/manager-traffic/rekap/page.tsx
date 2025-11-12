@@ -42,10 +42,22 @@ export default function RekapManagerTrafficPage() {
   const [chartData, setChartData] = useState<any[]>([]);
   const [totalAllInspeksi, setTotalAllInspeksi] = useState(0);
 
+  // GUARD: Manager Traffic tidak boleh akses halaman rekap
   useEffect(() => {
+    if (session?.user?.role === "MANAGER_TRAFFIC") {
+      router.push("/dashboard/manager-traffic");
+      return;
+    }
+  }, [session, router]);
+
+  useEffect(() => {
+    // Jangan fetch jika bukan Manager Operational
+    if (session?.user?.role !== "MANAGER_OPERATIONAL") {
+      return;
+    }
     fetchRekaps();
     fetchApprovedInspeksi(); // Fetch data inspeksi langsung untuk visualisasi
-  }, []);
+  }, [session]);
 
   const fetchRekaps = async () => {
     try {

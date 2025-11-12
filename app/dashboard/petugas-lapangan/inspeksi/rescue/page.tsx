@@ -1119,8 +1119,7 @@ export default function InspeksiRescuePage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-5xl mx-auto px-4">
         <div className="bg-gradient-to-r from-red-600 to-red-700 rounded-lg shadow-lg p-6 mb-8 text-white">
-          <div className="flex justify-between items-start mb-4">
-            <Link href="/dashboard/petugas-lapangan/inspeksi" className="inline-flex items-center text-white hover:text-red-100 transition">← Kembali ke Pilihan Kategori</Link>
+          <div className="flex justify-end items-start mb-4">
             {localStorage.getItem('draft_rescue') && (
               <button 
                 onClick={() => {
@@ -1135,7 +1134,7 @@ export default function InspeksiRescuePage() {
               </button>
             )}
           </div>
-          <h1 className="text-3xl font-bold mb-2">🚒 Inspeksi Kendaraan Rescue</h1>
+          <h1 className="text-3xl font-bold mb-2">Inspeksi Kendaraan Rescue</h1>
           <p className="text-red-100">Isi formulir inspeksi untuk kendaraan tim penyelamatan</p>
           {localStorage.getItem('draft_rescue') && (
             <div className="mt-2 bg-red-500 bg-opacity-50 rounded px-3 py-2 text-sm">

@@ -1656,13 +1656,7 @@ export default function InspeksiDerekPage() {
       <div className="max-w-5xl mx-auto px-4">
         {/* Header */}
         <div className="bg-gradient-to-r from-yellow-600 to-yellow-700 rounded-lg shadow-lg p-6 mb-8 text-white">
-          <div className="flex justify-between items-start mb-4">
-            <Link
-              href="/dashboard/petugas-lapangan/inspeksi"
-              className="inline-flex items-center text-white hover:text-yellow-100 transition"
-            >
-              ← Kembali ke Pilihan Kategori
-            </Link>
+          <div className="flex justify-end items-start mb-4">
             {localStorage.getItem('draft_derek') && (
               <button 
                 onClick={() => {
@@ -1677,7 +1671,7 @@ export default function InspeksiDerekPage() {
               </button>
             )}
           </div>
-          <h1 className="text-3xl font-bold mb-2">🚛 Inspeksi Kendaraan Derek</h1>
+          <h1 className="text-3xl font-bold mb-2">Inspeksi Kendaraan Derek</h1>
           <p className="text-yellow-100">
             Isi formulir inspeksi untuk kendaraan derek/towing
           </p>

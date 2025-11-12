@@ -15,20 +15,17 @@ export async function GET(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Only managers can access
-    if (session.user.role !== "MANAGER_TRAFFIC" && session.user.role !== "MANAGER_OPERATIONAL") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    // Only MANAGER_OPERATIONAL can access rekap
+    if (session.user.role !== "MANAGER_OPERATIONAL") {
+      return NextResponse.json({ error: "Forbidden - Only Manager Operational can access rekap" }, { status: 403 });
     }
 
     const searchParams = req.nextUrl.searchParams;
     const isRead = searchParams.get("isRead");
-    
-    // Determine manager role
-    const receiverRole = session.user.role === "MANAGER_TRAFFIC" ? "TRAFFIC" : "OPERATIONAL";
 
-    // Build query
+    // Build query - always OPERATIONAL
     const where: any = {
-      receiverRole: receiverRole,
+      receiverRole: "OPERATIONAL",
     };
 
     if (isRead !== null) {
@@ -238,8 +235,9 @@ export async function PATCH(req: NextRequest) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    if (session.user.role !== "MANAGER_TRAFFIC" && session.user.role !== "MANAGER_OPERATIONAL") {
-      return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+    // Only MANAGER_OPERATIONAL can mark rekap as read
+    if (session.user.role !== "MANAGER_OPERATIONAL") {
+      return NextResponse.json({ error: "Forbidden - Only Manager Operational can access rekap" }, { status: 403 });
     }
 
     const body = await req.json();

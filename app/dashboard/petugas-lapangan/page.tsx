@@ -185,11 +185,12 @@ export default function PetugasLapanganDashboard() {
         };
 
         userInspections.forEach((item: InspeksiItem) => {
-          if (item.status === 'APPROVED_BY_OPERATIONAL' || item.status === 'APPROVED_BY_TRAFFIC') {
+          // Hanya yang APPROVED_BY_OPERATIONAL yang benar-benar disetujui
+          if (item.status === 'APPROVED_BY_OPERATIONAL') {
             statusCount.approved += 1;
           } else if (item.status === 'REJECTED') {
             statusCount.rejected += 1;
-          } else if (item.status === 'SUBMITTED') {
+          } else if (item.status === 'SUBMITTED' || item.status === 'APPROVED_BY_TRAFFIC') {
             statusCount.pending += 1;
           }
         });
@@ -226,13 +227,13 @@ export default function PetugasLapanganDashboard() {
   return (
     <div className="space-y-4 sm:space-y-6 lg:space-y-8">
       {/* Welcome Header - Clean Design */}
-      <div className="bg-white rounded-xl shadow-sm border-l-4 border-blue-600 p-4 sm:p-6 lg:p-8">
+      <div className="bg-white rounded-xl shadow-sm border-l-4 border-blue-600 p-4 sm:p-6 lg:p-8 animate-slide-down">
         <h1 className="text-xl sm:text-2xl lg:text-3xl font-bold text-gray-900 mb-2">Dashboard Petugas Lapangan</h1>
         <p className="text-sm sm:text-base text-gray-600">Selamat datang kembali, <span className="font-bold text-blue-600">{session?.user?.name}</span></p>
       </div>
 
       {/* Status Laporan Inspeksi - Clean Design */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-slide-up stagger-1">
         <div className="bg-blue-600 px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
           <div className="flex items-center gap-2 sm:gap-3">
             <div className="bg-blue-700 p-2 sm:p-3 rounded-lg flex-shrink-0">
@@ -265,7 +266,7 @@ export default function PetugasLapanganDashboard() {
         ) : (
           <div className="divide-y divide-gray-100">
             {recentInspeksi.map((item, index) => (
-              <div key={item.id} className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 hover:bg-blue-50 transition-colors duration-200 group" style={{ animationDelay: `${index * 100}ms` }}>
+              <div key={item.id} className="px-4 sm:px-6 lg:px-8 py-4 sm:py-6 hover:bg-blue-50 transition-all duration-300 group animate-fade-in" style={{ animationDelay: `${index * 100}ms` }}>
                 <div className="flex flex-col lg:flex-row items-start justify-between gap-4 sm:gap-6">
                   <div className="flex-1 space-y-3 sm:space-y-4 w-full">
                     {/* Header */}
@@ -471,7 +472,7 @@ export default function PetugasLapanganDashboard() {
       </div>
 
       {/* Data Analytics - Charts and Filters */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden animate-slide-up stagger-2">
         <div className="bg-gradient-to-r from-blue-600 to-blue-700 px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between gap-3 sm:gap-4">
             <div className="flex items-center gap-2 sm:gap-3 min-w-0">
@@ -566,7 +567,7 @@ export default function PetugasLapanganDashboard() {
         <div className="px-4 sm:px-6 lg:px-8 pt-4 sm:pt-6 lg:pt-8">
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 lg:gap-6 mb-4 sm:mb-6 lg:mb-8">
             {/* Total Card */}
-            <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl p-4 sm:p-5 lg:p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
+            <div className="bg-gradient-to-br from-blue-500 to-blue-700 rounded-xl p-4 sm:p-5 lg:p-6 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 animate-bounce-in stagger-1">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div className="bg-blue-600 bg-opacity-50 p-2 sm:p-3 rounded-lg">
                   <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -579,7 +580,7 @@ export default function PetugasLapanganDashboard() {
             </div>
 
             {/* Approved Card */}
-            <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl p-4 sm:p-5 lg:p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
+            <div className="bg-gradient-to-br from-emerald-500 to-emerald-700 rounded-xl p-4 sm:p-5 lg:p-6 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 animate-bounce-in stagger-2">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div className="bg-emerald-600 bg-opacity-50 p-2 sm:p-3 rounded-lg">
                   <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -592,7 +593,7 @@ export default function PetugasLapanganDashboard() {
             </div>
 
             {/* Rejected Card */}
-            <div className="bg-gradient-to-br from-rose-500 to-rose-700 rounded-xl p-4 sm:p-5 lg:p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
+            <div className="bg-gradient-to-br from-rose-500 to-rose-700 rounded-xl p-4 sm:p-5 lg:p-6 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 animate-bounce-in stagger-3">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div className="bg-rose-600 bg-opacity-50 p-2 sm:p-3 rounded-lg">
                   <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -605,7 +606,7 @@ export default function PetugasLapanganDashboard() {
             </div>
 
             {/* Pending Card */}
-            <div className="bg-gradient-to-br from-orange-500 to-orange-700 rounded-xl p-4 sm:p-5 lg:p-6 text-white shadow-lg hover:shadow-xl transition-shadow">
+            <div className="bg-gradient-to-br from-orange-500 to-orange-700 rounded-xl p-4 sm:p-5 lg:p-6 text-white shadow-lg hover:shadow-xl hover:scale-105 transition-all duration-300 animate-bounce-in stagger-4">
               <div className="flex items-center justify-between mb-3 sm:mb-4">
                 <div className="bg-orange-600 bg-opacity-50 p-2 sm:p-3 rounded-lg">
                   <svg className="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -634,7 +635,7 @@ export default function PetugasLapanganDashboard() {
               <p className="text-sm sm:text-base text-gray-600">Tidak ada data inspeksi pada periode yang dipilih</p>
             </div>
           ) : (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6 lg:gap-8">
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
               {/* Status Approval/Rejection Chart */}
               <div>
                 <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
@@ -699,65 +700,6 @@ export default function PetugasLapanganDashboard() {
                 </div>
               </div>
 
-              {/* Pie Chart - Distribution by Category */}
-              <div>
-                <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
-                  <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" fill="currentColor" viewBox="0 0 20 20">
-                      <path d="M2 10a8 8 0 018-8v8h8a8 8 0 11-16 0z" />
-                      <path d="M12 2.252A8.014 8.014 0 0117.748 8H12V2.252z" />
-                    </svg>
-                  </div>
-                  <span className="truncate">Kategori Kendaraan</span>
-                </h4>
-                <div className="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl p-4 sm:p-6 border border-blue-100">
-                  <div className="w-full" style={{ minHeight: '250px' }}>
-                    <ResponsiveContainer width="100%" height={250}>
-                      <PieChart>
-                        <Pie
-                          data={chartData.byCategory}
-                          cx="50%"
-                          cy="50%"
-                          labelLine={false}
-                          label={(entry: any) => {
-                            // Simplified label for mobile
-                            if (typeof window !== 'undefined' && window.innerWidth < 640) {
-                              return `${entry.value}`;
-                            }
-                            return `${entry.name}: ${entry.value}`;
-                          }}
-                          outerRadius={typeof window !== 'undefined' && window.innerWidth < 640 ? 60 : 80}
-                          fill="#8884d8"
-                          dataKey="value"
-                          stroke="#ffffff"
-                          strokeWidth={2}
-                        >
-                          {chartData.byCategory.map((entry, index) => (
-                            <Cell key={`cell-${index}`} fill={entry.color} stroke="#ffffff" strokeWidth={2} />
-                          ))}
-                        </Pie>
-                        <Tooltip 
-                          contentStyle={{ 
-                            backgroundColor: 'rgba(255, 255, 255, 0.95)', 
-                            border: '2px solid #e5e7eb',
-                            borderRadius: '8px',
-                            padding: '8px 12px',
-                            fontSize: '11px'
-                          }}
-                        />
-                        <Legend 
-                          wrapperStyle={{
-                            paddingTop: '10px',
-                            fontSize: '11px'
-                          }}
-                          iconType="circle"
-                        />
-                      </PieChart>
-                    </ResponsiveContainer>
-                  </div>
-                </div>
-              </div>
-
               {/* Bar Chart - Trend over Time */}
               <div>
                 <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
@@ -784,94 +726,6 @@ export default function PetugasLapanganDashboard() {
               </div>
             </div>
           )}
-        </div>
-      </div>
-
-      {/* Info Box - Clean Design */}
-      <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
-        <div className="bg-blue-600 px-4 sm:px-6 lg:px-8 py-4 sm:py-5">
-          <div className="flex items-center gap-2 sm:gap-3">
-            <div className="bg-blue-700 p-2 sm:p-3 rounded-lg flex-shrink-0">
-              <svg className="w-5 h-5 sm:w-6 sm:h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
-                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd" />
-              </svg>
-            </div>
-            <h3 className="text-base sm:text-lg lg:text-xl font-bold text-white truncate">Panduan Inspeksi Kendaraan</h3>
-          </div>
-        </div>
-        <div className="p-4 sm:p-6 lg:p-8">
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-6 lg:gap-8">
-            <div>
-              <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
-                  </svg>
-                </div>
-                <span className="truncate">Kategori Kendaraan</span>
-              </h4>
-              <ul className="space-y-2 sm:space-y-3">
-                <li className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gray-50 rounded-xl hover:bg-blue-50 transition-colors">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-blue-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
-                    </svg>
-                  </div>
-                  <span className="font-semibold text-gray-700 text-sm sm:text-base truncate">Plaza - Kendaraan Operasional</span>
-                </li>
-                <li className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gray-50 rounded-xl hover:bg-blue-50 transition-colors">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-green-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                    </svg>
-                  </div>
-                  <span className="font-semibold text-gray-700 text-sm sm:text-base truncate">Derek - Kendaraan Evakuasi</span>
-                </li>
-                <li className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gray-50 rounded-xl hover:bg-blue-50 transition-colors">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-amber-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" />
-                    </svg>
-                  </div>
-                  <span className="font-semibold text-gray-700 text-sm sm:text-base truncate">Kamtib - Kendaraan Keamanan</span>
-                </li>
-                <li className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 bg-gray-50 rounded-xl hover:bg-blue-50 transition-colors">
-                  <div className="w-8 h-8 sm:w-10 sm:h-10 bg-red-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                    <svg className="w-4 h-4 sm:w-5 sm:h-5 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
-                    </svg>
-                  </div>
-                  <span className="font-semibold text-gray-700 text-sm sm:text-base truncate">Rescue - Kendaraan Penyelamatan</span>
-                </li>
-              </ul>
-            </div>
-            <div>
-              <h4 className="text-base sm:text-lg font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
-                <div className="w-7 h-7 sm:w-8 sm:h-8 bg-indigo-100 rounded-lg flex items-center justify-center flex-shrink-0">
-                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4" />
-                  </svg>
-                </div>
-                <span className="truncate">Langkah Inspeksi</span>
-              </h4>
-              <div className="space-y-3 sm:space-y-4">
-                {[
-                  { num: 1, text: "Pilih kategori kendaraan" },
-                  { num: 2, text: "Isi informasi dasar & lokasi GPS" },
-                  { num: 3, text: "Cek kelengkapan sarana & kendaraan" },
-                  { num: 4, text: "Upload dokumen & foto" },
-                  { num: 5, text: "Tanda tangan digital" }
-                ].map((step) => (
-                  <div key={step.num} className="flex items-start gap-3 sm:gap-4 p-2.5 sm:p-3 bg-gray-50 rounded-lg hover:bg-blue-50 transition-colors">
-                    <div className="flex-shrink-0 w-7 h-7 sm:w-8 sm:h-8 bg-blue-600 text-white rounded-lg flex items-center justify-center font-bold text-xs sm:text-sm">
-                      {step.num}
-                    </div>
-                    <p className="text-gray-700 font-medium flex-1 pt-1 text-sm sm:text-base">{step.text}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </div>

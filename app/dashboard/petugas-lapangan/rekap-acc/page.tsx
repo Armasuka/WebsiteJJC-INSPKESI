@@ -4,7 +4,6 @@ import { useSession } from "next-auth/react";
 import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import * as XLSX from 'xlsx';
 import ToastNotification from "@/app/components/ToastNotification";
 
 interface InspeksiItem {
@@ -152,37 +151,6 @@ export default function RekapAccPage() {
       RESCUE: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>,
     };
     return icons[kategori] || <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>;
-  };
-
-  const exportToExcel = () => {
-    const exportData = filteredInspeksi.map((item, index) => {
-      // Gunakan tanggal approval yang sesuai
-      const approvalDate = item.approvedAtOperational || item.approvedAtTraffic || item.tanggalInspeksi;
-      const statusLabel = item.status === 'APPROVED_BY_OPERATIONAL' 
-        ? 'FULLY APPROVED' 
-        : 'APPROVED BY TRAFFIC';
-      
-      return {
-        "No": index + 1,
-        "Tanggal": new Date(approvalDate).toLocaleDateString("id-ID", {
-          day: "2-digit",
-          month: "long",
-          year: "numeric",
-        }),
-        "Kategori": item.kategoriKendaraan,
-        "No. Polisi": item.nomorKendaraan,
-        "Petugas 1": `${item.namaPetugas} (${item.nipPetugas})`,
-        "Petugas 2": item.namaPetugas2 ? `${item.namaPetugas2} (${item.nipPetugas2})` : "-",
-        "Status": statusLabel,
-      };
-    });
-
-    const ws = XLSX.utils.json_to_sheet(exportData);
-    const wb = XLSX.utils.book_new();
-    XLSX.utils.book_append_sheet(wb, ws, "Rekap ACC");
-    
-    const fileName = `Rekap_Inspeksi_ACC_${new Date().toISOString().split('T')[0]}.xlsx`;
-    XLSX.writeFile(wb, fileName);
   };
 
   const handleDownloadPDF = async (inspeksiId: string, nomorKendaraan: string) => {
@@ -436,25 +404,16 @@ export default function RekapAccPage() {
             Menampilkan <span className="font-bold text-green-600">{filteredInspeksi.length}</span> dari{" "}
             <span className="font-bold">{inspeksi.length}</span> total inspeksi ACC
           </p>
-          <div className="flex gap-2">
-            <button
-              onClick={handleOpenSendModal}
-              disabled={filteredInspeksi.length === 0}
-              className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
-            >
-              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
-              </svg>
-              Kirim ke Manager
-            </button>
-            <button
-              onClick={exportToExcel}
-              disabled={filteredInspeksi.length === 0}
-              className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
-            >
-              Export to Excel
-            </button>
-          </div>
+          <button
+            onClick={handleOpenSendModal}
+            disabled={filteredInspeksi.length === 0}
+            className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
+          >
+            <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+            </svg>
+            Kirim ke Manager
+          </button>
         </div>
       </div>
 

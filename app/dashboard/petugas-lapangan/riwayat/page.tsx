@@ -41,7 +41,9 @@ export default function RiwayatInspeksiPage() {
   
   // Visualization data
   const [chartData, setChartData] = useState<any[]>([]);
+  const [rejectedChartData, setRejectedChartData] = useState<any[]>([]);
   const [totalApprovedInspeksi, setTotalApprovedInspeksi] = useState(0);
+  const [totalRejectedInspeksi, setTotalRejectedInspeksi] = useState(0);
 
   useEffect(() => {
     fetchInspeksi();
@@ -159,36 +161,41 @@ export default function RiwayatInspeksiPage() {
   };
 
   const calculateVisualizationData = () => {
-    // Hitung data untuk approved inspeksi saja
+    // Hitung data untuk approved inspeksi
     const approvedInspeksi = filteredInspeksi.filter(i => i.status === "APPROVED_BY_OPERATIONAL");
     
-    const aggregated: Record<string, number> = {};
+    const aggregatedApproved: Record<string, number> = {};
     approvedInspeksi.forEach((item) => {
-      aggregated[item.kategoriKendaraan] = (aggregated[item.kategoriKendaraan] || 0) + 1;
+      aggregatedApproved[item.kategoriKendaraan] = (aggregatedApproved[item.kategoriKendaraan] || 0) + 1;
     });
 
-    const total = approvedInspeksi.length;
-    const chartDataArray = Object.entries(aggregated).map(([kategori, count]) => ({
+    const totalApproved = approvedInspeksi.length;
+    const chartDataArray = Object.entries(aggregatedApproved).map(([kategori, count]) => ({
       name: kategori,
       value: count,
-      percentage: total > 0 ? ((count / total) * 100).toFixed(1) : "0",
+      percentage: totalApproved > 0 ? ((count / totalApproved) * 100).toFixed(1) : "0",
     }));
 
     setChartData(chartDataArray);
-    setTotalApprovedInspeksi(total);
-  };
+    setTotalApprovedInspeksi(totalApproved);
 
-  const handleExport = () => {
-    const params = new URLSearchParams();
+    // Hitung data untuk rejected inspeksi
+    const rejectedInspeksi = filteredInspeksi.filter(i => i.status === "REJECTED");
     
-    if (statusFilter !== "ALL") params.append("status", statusFilter);
-    if (kategoriFilter !== "ALL") params.append("kategori", kategoriFilter);
-    if (searchQuery) params.append("search", searchQuery);
-    if (customStartDate) params.append("startDate", customStartDate);
-    if (customEndDate) params.append("endDate", customEndDate);
-    
-    const url = `/api/inspeksi/export?${params.toString()}`;
-    window.open(url, '_blank');
+    const aggregatedRejected: Record<string, number> = {};
+    rejectedInspeksi.forEach((item) => {
+      aggregatedRejected[item.kategoriKendaraan] = (aggregatedRejected[item.kategoriKendaraan] || 0) + 1;
+    });
+
+    const totalRejected = rejectedInspeksi.length;
+    const rejectedChartDataArray = Object.entries(aggregatedRejected).map(([kategori, count]) => ({
+      name: kategori,
+      value: count,
+      percentage: totalRejected > 0 ? ((count / totalRejected) * 100).toFixed(1) : "0",
+    }));
+
+    setRejectedChartData(rejectedChartDataArray);
+    setTotalRejectedInspeksi(totalRejected);
   };
 
   const getStatusBadge = (status: string) => {
@@ -242,7 +249,7 @@ export default function RiwayatInspeksiPage() {
                 : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             }`}
           >
-            📋 Daftar Riwayat
+            Daftar Riwayat
           </button>
           <button
             onClick={() => setActiveTab("visualization")}
@@ -252,29 +259,21 @@ export default function RiwayatInspeksiPage() {
                 : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
             }`}
           >
-            📊 Visualisasi Data ACC
+            Visualisasi Data ACC
           </button>
         </div>
       </div>
 
       {/* Filters */}
       <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
-        <div className="flex items-center justify-between mb-4">
-          <h3 className="font-bold text-purple-600 flex items-center gap-2">
-            🔍 Filter & Pencarian
-          </h3>
-          <button
-            onClick={handleExport}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 font-medium shadow-sm flex items-center gap-2"
-          >
-            📥 Export Excel
-          </button>
-        </div>
+        <h3 className="font-bold text-purple-600 flex items-center gap-2 mb-4">
+          Filter & Pencarian
+        </h3>
         
         {/* Search Box */}
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">
-            🔎 Cari Nomor Kendaraan / Plat Nomor
+            Cari Nomor Kendaraan / Plat Nomor
           </label>
           <input
             type="text"
@@ -406,7 +405,7 @@ export default function RiwayatInspeksiPage() {
               {/* Pie Chart */}
               <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
                 <h4 className="font-bold text-lg mb-4 text-gray-900">
-                  📊 Distribusi per Kategori (Pie Chart)
+                  Distribusi per Kategori (Pie Chart)
                 </h4>
                 <ResponsiveContainer width="100%" height={300}>
                   <PieChart>
@@ -450,7 +449,7 @@ export default function RiwayatInspeksiPage() {
               {/* Bar Chart */}
               <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
                 <h4 className="font-bold text-lg mb-4 text-gray-900">
-                  📈 Jumlah per Kategori (Bar Chart)
+                  Jumlah per Kategori (Bar Chart)
                 </h4>
                 <ResponsiveContainer width="100%" height={300}>
                   <BarChart data={chartData}>
@@ -479,7 +478,7 @@ export default function RiwayatInspeksiPage() {
           {/* Detailed Breakdown */}
           {chartData.length > 0 && (
             <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
-              <h4 className="font-bold text-lg mb-4 text-gray-900">📋 Detail per Kategori</h4>
+              <h4 className="font-bold text-lg mb-4 text-gray-900">Detail per Kategori</h4>
               <div className="space-y-2">
                 {chartData.map((item, idx) => (
                   <div
@@ -505,6 +504,126 @@ export default function RiwayatInspeksiPage() {
               </div>
             </div>
           )}
+
+          {/* Rejected Inspections Section */}
+          <div className="bg-white rounded-lg border border-red-200 p-6 shadow-sm">
+            <div className="flex items-center gap-2 mb-4">
+              <svg className="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+              <h3 className="text-2xl font-bold text-red-600">
+                Inspeksi Ditolak
+              </h3>
+            </div>
+            <p className="text-gray-700 mb-6">
+              Total: <span className="font-bold text-red-600 text-xl">{totalRejectedInspeksi}</span> inspeksi ditolak
+            </p>
+
+            {rejectedChartData.length > 0 ? (
+              <div className="space-y-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                  {/* Pie Chart for Rejected */}
+                  <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                    <h4 className="font-bold text-lg mb-4 text-gray-900">
+                      Distribusi Ditolak per Kategori
+                    </h4>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <PieChart>
+                        <Pie
+                          data={rejectedChartData}
+                          cx="50%"
+                          cy="50%"
+                          labelLine={false}
+                          label={(entry) => `${entry.name}: ${entry.percentage}%`}
+                          outerRadius={100}
+                          fill="#8884d8"
+                          dataKey="value"
+                        >
+                          {rejectedChartData.map((entry, index) => (
+                            <Cell
+                              key={`cell-rejected-${index}`}
+                              fill={COLORS[entry.name as keyof typeof COLORS] || "#8884d8"}
+                            />
+                          ))}
+                        </Pie>
+                        <Tooltip />
+                      </PieChart>
+                    </ResponsiveContainer>
+                    <div className="mt-4 grid grid-cols-2 gap-2">
+                      {rejectedChartData.map((item) => (
+                        <div key={item.name} className="flex items-center gap-2">
+                          <div
+                            className="w-4 h-4 rounded"
+                            style={{
+                              backgroundColor: COLORS[item.name as keyof typeof COLORS] || "#8884d8",
+                            }}
+                          ></div>
+                          <span className="text-sm text-gray-700">
+                            {item.name}: {item.value} ({item.percentage}%)
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+
+                  {/* Bar Chart for Rejected */}
+                  <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                    <h4 className="font-bold text-lg mb-4 text-gray-900">
+                      Jumlah Ditolak per Kategori
+                    </h4>
+                    <ResponsiveContainer width="100%" height={300}>
+                      <BarChart data={rejectedChartData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="name" />
+                        <YAxis />
+                        <Tooltip />
+                        <Legend />
+                        <Bar dataKey="value" fill="#DC2626" name="Jumlah Inspeksi Ditolak" />
+                      </BarChart>
+                    </ResponsiveContainer>
+                  </div>
+                </div>
+
+                {/* Detailed Breakdown for Rejected */}
+                <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                  <h4 className="font-bold text-lg mb-4 text-gray-900">Detail Ditolak per Kategori</h4>
+                  <div className="space-y-2">
+                    {rejectedChartData.map((item, idx) => (
+                      <div
+                        key={idx}
+                        className="flex items-center justify-between p-4 bg-red-50 rounded-lg border border-red-200 hover:bg-red-100 transition-colors duration-200"
+                      >
+                        <div className="flex items-center gap-3">
+                          <div
+                            className="w-6 h-6 rounded"
+                            style={{
+                              backgroundColor: COLORS[item.name as keyof typeof COLORS] || "#8884d8",
+                            }}
+                          ></div>
+                          <span className="font-semibold text-gray-900">{item.name}</span>
+                        </div>
+                        <div className="text-right">
+                          <span className="font-bold text-red-600 text-xl">{item.value}</span>
+                          <span className="text-sm text-gray-700 font-medium ml-2">inspeksi</span>
+                          <span className="text-xs text-gray-700 ml-2">({item.percentage}%)</span>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="text-center py-8 bg-gray-50 rounded-lg border border-gray-200">
+                <svg className="w-12 h-12 text-gray-300 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                <p className="text-gray-600 font-medium">Tidak ada inspeksi yang ditolak</p>
+                <p className="text-sm text-gray-500 mt-1">
+                  Semua inspeksi dalam periode ini telah disetujui atau masih dalam proses
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         /* DAFTAR RIWAYAT */

@@ -24,7 +24,7 @@ interface Inspeksi {
 }
 
 export default function ManagerTrafficDashboard() {
-  const { data: session } = useSession();
+  const { data: session, status: sessionStatus } = useSession();
   const [inspeksiList, setInspeksiList] = useState<Inspeksi[]>([]);
   const [approvedList, setApprovedList] = useState<Inspeksi[]>([]);
   const [loading, setLoading] = useState(true);
@@ -47,12 +47,22 @@ export default function ManagerTrafficDashboard() {
   };
 
   const fetchInspeksi = async () => {
+    // Don't fetch if session is not ready
+    if (sessionStatus !== "authenticated") {
+      console.log("[MANAGER TRAFFIC] Waiting for session to be ready...");
+      return;
+    }
+
     try {
       setLoading(true);
       console.log("[MANAGER TRAFFIC] Fetching inspeksi data...");
       
       // Optimasi: Fetch hanya data yang diperlukan dengan limit
-      const response = await fetch("/api/inspeksi?limit=50");
+      const response = await fetch("/api/inspeksi?limit=50", {
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      });
       
       if (!response.ok) {
         throw new Error(`HTTP ${response.status}: ${response.statusText}`);
@@ -90,8 +100,11 @@ export default function ManagerTrafficDashboard() {
   };
 
   useEffect(() => {
-    fetchInspeksi();
-  }, []);
+    // Only fetch when session is authenticated
+    if (sessionStatus === "authenticated") {
+      fetchInspeksi();
+    }
+  }, [sessionStatus]);
 
   const handleOpenSignature = async (inspeksi: Inspeksi, viewOnly: boolean = false) => {
     setSelectedInspeksi(inspeksi);
@@ -100,7 +113,11 @@ export default function ManagerTrafficDashboard() {
     setLoadingDetail(true);
     
     try {
-      const response = await fetch(`/api/inspeksi/${inspeksi.id}`);
+      const response = await fetch(`/api/inspeksi/${inspeksi.id}`, {
+        headers: {
+          'Cache-Control': 'no-cache',
+        },
+      });
       if (response.ok) {
         const detail = await response.json();
         setInspeksiDetail(detail);
@@ -207,18 +224,6 @@ export default function ManagerTrafficDashboard() {
     approved: approvedList.length,
   };
 
-  const handleExport = () => {
-    const params = new URLSearchParams();
-    const status = activeTab === "pending" ? "SUBMITTED" : "APPROVED_BY_TRAFFIC,APPROVED_BY_OPERATIONAL";
-    
-    params.append("status", status);
-    if (kategoriFilter !== "ALL") params.append("kategori", kategoriFilter);
-    if (searchQuery) params.append("search", searchQuery);
-    
-    const url = `/api/inspeksi/export?${params.toString()}`;
-    window.open(url, '_blank');
-  };
-
   // Filter data based on search and kategori
   const getFilteredList = (list: Inspeksi[]) => {
     let filtered = [...list];
@@ -239,6 +244,18 @@ export default function ManagerTrafficDashboard() {
   const filteredPendingList = getFilteredList(inspeksiList);
   const filteredApprovedList = getFilteredList(approvedList);
 
+  // Show loading state while session is loading
+  if (sessionStatus === "loading") {
+    return (
+      <div className="min-h-screen bg-gray-50 flex items-center justify-center">
+        <div className="text-center">
+          <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
+          <p className="text-gray-600">Memuat...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="min-h-screen bg-gray-50" style={{ fontFamily: "'Poppins', sans-serif" }}>
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 space-y-6">
@@ -255,7 +272,7 @@ export default function ManagerTrafficDashboard() {
         </div>
 
         {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
           <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 transition-colors duration-200">
             <div className="flex items-center justify-between">
               <div>
@@ -297,20 +314,6 @@ export default function ManagerTrafficDashboard() {
               </div>
             </div>
           </div>
-
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 transition-colors duration-200">
-            <div className="flex items-center justify-between">
-              <div>
-                <p className="text-gray-800 text-sm font-semibold mb-1">Status</p>
-                <p className="text-2xl font-bold text-orange-600">Aktif</p>
-              </div>
-              <div className="w-14 h-14 bg-orange-100 rounded-lg flex items-center justify-center">
-                <svg className="w-7 h-7 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" />
-                </svg>
-              </div>
-            </div>
-          </div>
         </div>
 
         {/* Tabs */}
@@ -324,15 +327,6 @@ export default function ManagerTrafficDashboard() {
                 </svg>
                 Filter & Pencarian
               </h3>
-              <button
-                onClick={handleExport}
-                className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg transition-colors duration-200 font-medium shadow-sm flex items-center gap-2"
-              >
-                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                </svg>
-                Export Excel
-              </button>
             </div>
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

@@ -1421,13 +1421,7 @@ export default function InspeksiPlazaPage() {
       <div className="max-w-5xl mx-auto px-4">
         {/* Header */}
         <div className="bg-gradient-to-r from-orange-600 to-orange-700 rounded-lg shadow-lg p-6 mb-8 text-white">
-          <div className="flex justify-between items-start mb-4">
-            <Link
-              href="/dashboard/petugas-lapangan/inspeksi"
-              className="inline-flex items-center text-white hover:text-orange-100 transition"
-            >
-              ← Kembali ke Pilihan Kategori
-            </Link>
+          <div className="flex justify-end items-start mb-4">
             {localStorage.getItem('draft_plaza') && (
               <button 
                 onClick={() => {
@@ -1442,7 +1436,7 @@ export default function InspeksiPlazaPage() {
               </button>
             )}
           </div>
-          <h1 className="text-3xl font-bold mb-2">🚦 Inspeksi Kendaraan Plaza</h1>
+          <h1 className="text-3xl font-bold mb-2">Inspeksi Kendaraan Plaza</h1>
           <p className="text-orange-100">
             Isi formulir inspeksi untuk kendaraan operasional plaza tol
           </p>

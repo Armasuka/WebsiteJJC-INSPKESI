@@ -3,7 +3,6 @@
 import { useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
-import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 interface RekapItem {
   id: string;
@@ -31,70 +30,41 @@ const COLORS = {
 
 export default function RekapManagerOperationalPage() {
   const router = useRouter();
-  const { data: session } = useSession();
-  const [activeTab, setActiveTab] = useState<"unread" | "all" | "chart">("unread");
+  const { data: session, status } = useSession();
+  const [activeTab, setActiveTab] = useState<"unread" | "all">("unread");
   const [rekaps, setRekaps] = useState<RekapItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedRekap, setSelectedRekap] = useState<RekapItem | null>(null);
   const [showDetailModal, setShowDetailModal] = useState(false);
 
-  // Chart data
-  const [chartData, setChartData] = useState<any[]>([]);
-  const [totalAllInspeksi, setTotalAllInspeksi] = useState(0);
-
   useEffect(() => {
-    fetchRekaps();
-    fetchApprovedInspeksi(); // Fetch data inspeksi langsung untuk visualisasi
-  }, []);
+    if (status === "authenticated") {
+      fetchRekaps();
+    }
+  }, [status]);
 
   const fetchRekaps = async () => {
     try {
       setLoading(true);
-      const response = await fetch("/api/rekap-manager");
+      const response = await fetch("/api/rekap-manager", {
+        cache: "no-store",
+        headers: {
+          "Cache-Control": "no-cache",
+        },
+      });
       if (response.ok) {
         const data = await response.json();
         setRekaps(data);
+      } else {
+        console.error("Failed to fetch rekaps:", response.status);
+        setRekaps([]);
       }
     } catch (error) {
       console.error("Error fetching rekaps:", error);
+      setRekaps([]);
     } finally {
       setLoading(false);
     }
-  };
-
-  const fetchApprovedInspeksi = async () => {
-    try {
-      // Fetch inspeksi yang sudah di-ACC langsung dari database
-      const response = await fetch("/api/inspeksi?status=APPROVED_BY_OPERATIONAL&limit=1000");
-      if (response.ok) {
-        const result = await response.json();
-        const data = result.data || result;
-        calculateChartData(data);
-      }
-    } catch (error) {
-      console.error("Error fetching approved inspeksi:", error);
-    }
-  };
-
-  const calculateChartData = (inspeksiData: any[]) => {
-    // Hitung langsung dari data inspeksi yang sudah di-ACC
-    const aggregated: Record<string, number> = {};
-    let total = 0;
-
-    inspeksiData.forEach((inspeksi) => {
-      const kategori = inspeksi.kategoriKendaraan;
-      aggregated[kategori] = (aggregated[kategori] || 0) + 1;
-      total += 1;
-    });
-
-    const chartDataArray = Object.entries(aggregated).map(([kategori, count]) => ({
-      name: kategori,
-      value: count,
-      percentage: total > 0 ? ((count / total) * 100).toFixed(1) : "0",
-    }));
-
-    setChartData(chartDataArray);
-    setTotalAllInspeksi(total);
   };
 
   const handleMarkAsRead = async (rekapId: string) => {
@@ -198,74 +168,60 @@ export default function RekapManagerOperationalPage() {
           >
             Semua Rekap
           </button>
-          <button
-            onClick={() => setActiveTab("chart")}
-            className={`flex-1 px-6 py-4 font-medium transition-colors duration-200 flex items-center justify-center gap-2 ${
-              activeTab === "chart"
-                ? "text-green-600 border-b-2 border-green-600"
-                : "text-gray-600 hover:text-gray-900"
-            }`}
-          >
-            <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M7 12l3-3 3 3 4-4M8 21l4-4 4 4M3 4h18M4 4h16v12a1 1 0 01-1 1H5a1 1 0 01-1-1V4z" />
-            </svg>
-            Visualisasi Data
-          </button>
         </div>
 
         {/* Content */}
-        {activeTab !== "chart" ? (
-          <div className="p-6">
-            {loading ? (
-              <div className="text-center py-12">
-                <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-                <p className="text-gray-700 mt-4 font-medium">Memuat data...</p>
-              </div>
-            ) : displayRekaps.length === 0 ? (
-              <div className="text-center py-12">
-                <svg
-                  className="w-16 h-16 text-gray-300 mx-auto mb-4"
-                  fill="none"
-                  stroke="currentColor"
-                  viewBox="0 0 24 24"
+        <div className="p-6">
+          {loading ? (
+            <div className="text-center py-12">
+              <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
+              <p className="text-gray-700 mt-4 font-medium">Memuat data...</p>
+            </div>
+          ) : displayRekaps.length === 0 ? (
+            <div className="text-center py-12">
+              <svg
+                className="w-16 h-16 text-gray-300 mx-auto mb-4"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
+                />
+              </svg>
+              <p className="text-gray-800 font-semibold text-lg">
+                {activeTab === "unread" ? "Tidak ada rekap baru" : "Belum ada rekap"}
+              </p>
+            </div>
+          ) : (
+            <div className="space-y-4">
+              {displayRekaps.map((rekap) => (
+                <div
+                  key={rekap.id}
+                  className={`border rounded-lg p-4 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
+                    !rekap.isRead ? "bg-green-50 border-green-300" : "bg-white border-gray-200"
+                  }`}
+                  onClick={() => handleViewDetail(rekap)}
                 >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"
-                  />
-                </svg>
-                <p className="text-gray-800 font-semibold text-lg">
-                  {activeTab === "unread" ? "Tidak ada rekap baru" : "Belum ada rekap"}
-                </p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {displayRekaps.map((rekap) => (
-                  <div
-                    key={rekap.id}
-                    className={`border rounded-lg p-4 hover:shadow-md transition-shadow duration-200 cursor-pointer ${
-                      !rekap.isRead ? "bg-green-50 border-green-300" : "bg-white border-gray-200"
-                    }`}
-                    onClick={() => handleViewDetail(rekap)}
-                  >
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <div className="flex items-center gap-2 mb-2">
-                          {!rekap.isRead && (
-                            <span className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span>
-                          )}
-                          <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-                          </svg>
-                          <h3 className="font-bold text-lg text-gray-900">
-                            {rekap.judulRekap}
-                          </h3>
-                        </div>
-                        <div className="flex flex-wrap gap-3 text-sm text-gray-700 font-medium mb-2">
-                          <span className="flex items-center gap-1">
-                            {getPeriodeIcon()}
+                  <div className="flex items-start justify-between">
+                    <div className="flex-1">
+                      <div className="flex items-center gap-2 mb-2">
+                        {!rekap.isRead && (
+                          <span className="w-2 h-2 bg-green-600 rounded-full animate-pulse"></span>
+                        )}
+                        <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                        </svg>
+                        <h3 className="font-bold text-lg text-gray-900">
+                          {rekap.judulRekap}
+                        </h3>
+                      </div>
+                      <div className="flex flex-wrap gap-3 text-sm text-gray-700 font-medium mb-2">
+                        <span className="flex items-center gap-1">
+                          {getPeriodeIcon()}
                             {getPeriodeTypeLabel(rekap.periodeType)}
                           </span>
                           <span className="flex items-center gap-1">
@@ -298,108 +254,39 @@ export default function RekapManagerOperationalPage() {
                           })}
                         </p>
                       </div>
-                      <button
-                        className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition-colors duration-200 flex items-center gap-2"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          handleViewDetail(rekap);
-                        }}
-                      >
-                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-                        </svg>
-                        Lihat Detail
-                      </button>
+                      <div className="flex flex-col gap-2">
+                        <button
+                          className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-sm transition-colors duration-200 flex items-center gap-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            router.push(`/dashboard/manager-operational/rekap/view/${rekap.id}`);
+                          }}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                          </svg>
+                          Lihat Laporan
+                        </button>
+                        <button
+                          className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg text-sm transition-colors duration-200 flex items-center gap-2"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            handleViewDetail(rekap);
+                          }}
+                        >
+                          <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+                          </svg>
+                          Info Detail
+                        </button>
+                      </div>
                     </div>
                   </div>
                 ))}
               </div>
             )}
           </div>
-        ) : (
-          // Chart Tab
-          <div className="p-6 space-y-6">
-            <div className="bg-gradient-to-r from-green-50 to-emerald-50 rounded-lg p-6 border border-green-200">
-              <h3 className="text-2xl font-bold text-gray-900 mb-2">
-                Total Inspeksi yang di-ACC
-              </h3>
-              <p className="text-4xl font-bold text-green-600">{totalAllInspeksi}</p>
-              <p className="text-sm text-gray-600 mt-1">
-                Data real-time dari database inspeksi
-              </p>
-            </div>
-
-            {chartData.length > 0 ? (
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* Pie Chart */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                  <h4 className="font-bold text-lg mb-4 text-gray-900">
-                    Distribusi per Kategori (Pie Chart)
-                  </h4>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <PieChart>
-                      <Pie
-                        data={chartData}
-                        cx="50%"
-                        cy="50%"
-                        labelLine={false}
-                        label={(entry) => `${entry.name}: ${entry.percentage}%`}
-                        outerRadius={100}
-                        fill="#8884d8"
-                        dataKey="value"
-                      >
-                        {chartData.map((entry, index) => (
-                          <Cell
-                            key={`cell-${index}`}
-                            fill={COLORS[entry.name as keyof typeof COLORS]}
-                          />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="mt-4 grid grid-cols-2 gap-2">
-                    {chartData.map((item) => (
-                      <div key={item.name} className="flex items-center gap-2">
-                        <div
-                          className="w-4 h-4 rounded"
-                          style={{
-                            backgroundColor: COLORS[item.name as keyof typeof COLORS],
-                          }}
-                        ></div>
-                        <span className="text-sm text-gray-700">
-                          {item.name}: {item.value}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-
-                {/* Bar Chart */}
-                <div className="bg-white rounded-lg border border-gray-200 p-6">
-                  <h4 className="font-bold text-lg mb-4 text-gray-900">
-                    Jumlah per Kategori (Bar Chart)
-                  </h4>
-                  <ResponsiveContainer width="100%" height={300}>
-                    <BarChart data={chartData}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="name" />
-                      <YAxis />
-                      <Tooltip />
-                      <Legend />
-                      <Bar dataKey="value" fill="#10B981" name="Jumlah Inspeksi" />
-                    </BarChart>
-                  </ResponsiveContainer>
-                </div>
-              </div>
-            ) : (
-              <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
-                <p className="text-gray-600">Belum ada data untuk divisualisasikan</p>
-              </div>
-            )}
-          </div>
-        )}
       </div>
 
       {/* Detail Modal */}
@@ -494,6 +381,28 @@ export default function RekapManagerOperationalPage() {
                   </div>
                 </div>
               )}
+
+              {/* Action Buttons */}
+              <div className="flex gap-3 pt-4 border-t border-gray-200">
+                <button
+                  onClick={() => setShowDetailModal(false)}
+                  className="flex-1 px-4 py-2 border border-gray-300 text-gray-700 rounded-lg hover:bg-gray-50 transition-colors duration-200"
+                >
+                  Tutup
+                </button>
+                <button
+                  onClick={() => {
+                    setShowDetailModal(false);
+                    router.push(`/dashboard/manager-operational/rekap/view/${selectedRekap.id}`);
+                  }}
+                  className="flex-1 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 flex items-center justify-center gap-2"
+                >
+                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                  </svg>
+                  Lihat Laporan Visual
+                </button>
+              </div>
             </div>
           </div>
         </div>

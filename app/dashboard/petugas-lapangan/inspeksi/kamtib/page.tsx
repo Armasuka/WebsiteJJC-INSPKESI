@@ -1345,8 +1345,7 @@ export default function InspeksiKamtibPage() {
     <div className="min-h-screen bg-gray-50 py-8">
       <div className="max-w-5xl mx-auto px-4">
         <div className="bg-gradient-to-r from-indigo-600 to-indigo-700 rounded-lg shadow-lg p-6 mb-8 text-white">
-          <div className="flex justify-between items-start mb-4">
-            <Link href="/dashboard/petugas-lapangan/inspeksi" className="inline-flex items-center text-white hover:text-indigo-100 transition">← Kembali ke Pilihan Kategori</Link>
+          <div className="flex justify-end items-start mb-4">
             {localStorage.getItem('draft_kamtib') && (
               <button 
                 onClick={() => {
@@ -1361,7 +1360,7 @@ export default function InspeksiKamtibPage() {
               </button>
             )}
           </div>
-          <h1 className="text-3xl font-bold mb-2">🚔 Inspeksi Kendaraan Kamtib</h1>
+          <h1 className="text-3xl font-bold mb-2">Inspeksi Kendaraan Kamtib</h1>
           <p className="text-indigo-100">
             Isi formulir inspeksi untuk kendaraan keamanan dan ketertiban
           </p>
