@@ -601,7 +601,7 @@ export default function InspeksiDerekPage() {
             onChange={handleInputChange}
             required
             placeholder="Contoh: Pool Derek KM 50 Tol Cipularang"
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-black"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium"
           />
         </div>
         
@@ -694,7 +694,7 @@ export default function InspeksiDerekPage() {
                     {itemData.ada && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                         <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">
                             Jumlah *
                           </label>
                           <div className="flex items-center gap-2">
@@ -732,7 +732,7 @@ export default function InspeksiDerekPage() {
                           </div>
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">
                             Kondisi *
                           </label>
                           <select
@@ -792,7 +792,7 @@ export default function InspeksiDerekPage() {
                     {itemData.ada && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                         <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">
                             Jumlah *
                           </label>
                           <div className="flex items-center gap-2">
@@ -830,7 +830,7 @@ export default function InspeksiDerekPage() {
                           </div>
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">
                             Kondisi *
                           </label>
                           <select
@@ -1083,7 +1083,7 @@ export default function InspeksiDerekPage() {
             onChange={handleInputChange}
             placeholder="contoh: 50"
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-black"
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium"
           />
         </div>
         <div>
@@ -1234,30 +1234,30 @@ export default function InspeksiDerekPage() {
         <h4 className="font-bold text-blue-800 mb-3">📊 Ringkasan Inspeksi</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
           <div>
-            <p className="text-gray-600">Petugas 1:</p>
+            <p className="text-gray-800 font-semibold">Petugas 1:</p>
             <p className="font-semibold text-gray-800">{formData.namaPetugas1}</p>
           </div>
           <div>
-            <p className="text-gray-600">Plat Nomor:</p>
+            <p className="text-gray-800 font-semibold">Plat Nomor:</p>
             <p className="font-semibold text-gray-800">{formData.platNomor}</p>
           </div>
           <div>
-            <p className="text-gray-600">Merk:</p>
+            <p className="text-gray-800 font-semibold">Merk:</p>
             <p className="font-semibold text-gray-800">{formData.merkKendaraan}</p>
           </div>
           <div>
-            <p className="text-gray-600">Lokasi:</p>
+            <p className="text-gray-800 font-semibold">Lokasi:</p>
             <p className="font-semibold text-gray-800">{formData.lokasiInspeksi}</p>
           </div>
           <div>
-            <p className="text-gray-600">Kelengkapan Sarana:</p>
+            <p className="text-gray-800 font-semibold">Kelengkapan Sarana:</p>
             <p className="font-semibold text-gray-800">
               {Object.values(formData.kelengkapanSarana).filter(item => item?.ada).length} /{" "}
               {kelengkapanSaranaDerek.length} item
             </p>
           </div>
           <div>
-            <p className="text-gray-600">Kelengkapan Kendaraan:</p>
+            <p className="text-gray-800 font-semibold">Kelengkapan Kendaraan:</p>
             <p className="font-semibold text-gray-800">
               {Object.values(formData.kelengkapanKendaraan).filter(item => item?.ada).length} /{" "}
               {kelengkapanKendaraanUmum.length} item
@@ -1744,5 +1744,8 @@ export default function InspeksiDerekPage() {
     </div>
   );
 }
+
+
+
 
 

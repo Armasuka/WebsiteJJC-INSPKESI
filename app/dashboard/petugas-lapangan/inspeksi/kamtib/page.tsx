@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useRef, useEffect } from "react";
 import { useSession } from "next-auth/react";
@@ -555,11 +555,11 @@ export default function InspeksiKamtibPage() {
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Nama Petugas 1 *</label>
-          <input type="text" name="namaPetugas1" value={formData.namaPetugas1} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black" />
+          <input type="text" name="namaPetugas1" value={formData.namaPetugas1} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">NIP Petugas 1 *</label>
-          <input type="text" name="nipPetugas1" value={formData.nipPetugas1} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black" />
+          <input type="text" name="nipPetugas1" value={formData.nipPetugas1} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium" />
         </div>
       </div>
 
@@ -569,11 +569,11 @@ export default function InspeksiKamtibPage() {
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Nama Petugas 2 *</label>
-          <input type="text" name="namaPetugas2" value={formData.namaPetugas2} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-black" />
+          <input type="text" name="namaPetugas2" value={formData.namaPetugas2} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">NIP Petugas 2 *</label>
-          <input type="text" name="nipPetugas2" value={formData.nipPetugas2} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-black" />
+          <input type="text" name="nipPetugas2" value={formData.nipPetugas2} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium" />
         </div>
       </div>
 
@@ -583,7 +583,7 @@ export default function InspeksiKamtibPage() {
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Plat Nomor *</label>
-          <input type="text" name="platNomor" value={formData.platNomor} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-black" />
+          <input type="text" name="platNomor" value={formData.platNomor} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium" />
         </div>
       </div>
 
@@ -593,16 +593,16 @@ export default function InspeksiKamtibPage() {
       <div className="bg-white rounded-lg shadow-md p-6">
         <div className="mb-4">
           <label className="block text-sm font-medium text-gray-700 mb-2">Lokasi Inspeksi *</label>
-          <input type="text" name="lokasiInspeksi" value={formData.lokasiInspeksi} onChange={handleInputChange} required placeholder="Contoh: Pos Kamtib KM 60" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-black" />
+          <input type="text" name="lokasiInspeksi" value={formData.lokasiInspeksi} onChange={handleInputChange} required placeholder="Contoh: Pos Kamtib KM 60" className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium" />
         </div>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Latitude</label>
-            <input type="text" name="latitude" value={formData.latitude} onChange={handleInputChange} readOnly className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-black" />
+            <input type="text" name="latitude" value={formData.latitude} onChange={handleInputChange} readOnly className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-black placeholder:text-gray-700 placeholder:font-medium" />
           </div>
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Longitude</label>
-            <input type="text" name="longitude" value={formData.longitude} onChange={handleInputChange} readOnly className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-black" />
+            <input type="text" name="longitude" value={formData.longitude} onChange={handleInputChange} readOnly className="w-full px-4 py-2 border border-gray-300 rounded-lg bg-gray-50 text-black placeholder:text-gray-700 placeholder:font-medium" />
           </div>
           <div className="flex items-end">
             <button type="button" onClick={getLocation} disabled={isGettingLocation} className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-medium transition disabled:bg-gray-400">
@@ -640,15 +640,15 @@ export default function InspeksiKamtibPage() {
                     {itemData.ada && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                         <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">Jumlah *</label>
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">Jumlah *</label>
                           <div className="flex items-center gap-2">
                             <button type="button" onClick={() => { const currentJumlah = parseInt(itemData.jumlah) || 0; if (currentJumlah > 0) { handleKelengkapanChange("sarana", item, "jumlah", (currentJumlah - 1).toString()); }}} className="w-10 h-10 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold text-lg flex items-center justify-center transition">−</button>
-                            <input type="number" value={itemData.jumlah} onChange={(e) => handleKelengkapanChange("sarana", item, "jumlah", e.target.value)} className="flex-1 px-3 py-2 text-sm text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-black" min="0" />
+                            <input type="number" value={itemData.jumlah} onChange={(e) => handleKelengkapanChange("sarana", item, "jumlah", e.target.value)} className="flex-1 px-3 py-2 text-sm text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium" min="0" />
                             <button type="button" onClick={() => { const currentJumlah = parseInt(itemData.jumlah) || 0; handleKelengkapanChange("sarana", item, "jumlah", (currentJumlah + 1).toString()); }} className="w-10 h-10 bg-indigo-500 hover:bg-indigo-600 text-white rounded-lg font-bold text-lg flex items-center justify-center transition">+</button>
                           </div>
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">Kondisi *</label>
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">Kondisi *</label>
                           <select value={itemData.kondisi} onChange={(e) => handleKelengkapanChange("sarana", item, "kondisi", e.target.value)} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-transparent text-black">
                             <option value="BAIK">✅ Baik</option>
                             <option value="RUSAK_RINGAN">⚠️ Rusak Ringan</option>
@@ -683,15 +683,15 @@ export default function InspeksiKamtibPage() {
                     {itemData.ada && (
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 mt-3">
                         <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">Jumlah *</label>
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">Jumlah *</label>
                           <div className="flex items-center gap-2">
                             <button type="button" onClick={() => { const currentJumlah = parseInt(itemData.jumlah) || 0; if (currentJumlah > 0) { handleKelengkapanChange("kendaraan", item, "jumlah", (currentJumlah - 1).toString()); }}} className="w-10 h-10 bg-gray-200 hover:bg-gray-300 text-gray-700 rounded-lg font-bold text-lg flex items-center justify-center transition">−</button>
-                            <input type="number" value={itemData.jumlah} onChange={(e) => handleKelengkapanChange("kendaraan", item, "jumlah", e.target.value)} className="flex-1 px-3 py-2 text-sm text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black" min="0" />
+                            <input type="number" value={itemData.jumlah} onChange={(e) => handleKelengkapanChange("kendaraan", item, "jumlah", e.target.value)} className="flex-1 px-3 py-2 text-sm text-center border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium" min="0" />
                             <button type="button" onClick={() => { const currentJumlah = parseInt(itemData.jumlah) || 0; handleKelengkapanChange("kendaraan", item, "jumlah", (currentJumlah + 1).toString()); }} className="w-10 h-10 bg-blue-500 hover:bg-blue-600 text-white rounded-lg font-bold text-lg flex items-center justify-center transition">+</button>
                           </div>
                         </div>
                         <div>
-                          <label className="block text-xs font-medium text-gray-600 mb-1">Kondisi *</label>
+                          <label className="block text-xs font-semibold text-gray-800 mb-1">Kondisi *</label>
                           <select value={itemData.kondisi} onChange={(e) => handleKelengkapanChange("kendaraan", item, "kondisi", e.target.value)} className="w-full px-3 py-2 text-sm border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black">
                             <option value="BAIK">✅ Baik</option>
                             <option value="RUSAK_RINGAN">⚠️ Rusak Ringan</option>
@@ -723,7 +723,7 @@ export default function InspeksiKamtibPage() {
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Masa Berlaku *</label>
-          <input type="date" name="masaBerlakuSTNK" value={formData.masaBerlakuSTNK} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black" />
+          <input type="date" name="masaBerlakuSTNK" value={formData.masaBerlakuSTNK} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Foto STNK *</label>
@@ -749,7 +749,7 @@ export default function InspeksiKamtibPage() {
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Masa Berlaku *</label>
-          <input type="date" name="masaBerlakuKIR" value={formData.masaBerlakuKIR} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-black" />
+          <input type="date" name="masaBerlakuKIR" value={formData.masaBerlakuKIR} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-green-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Foto KIR *</label>
@@ -775,7 +775,7 @@ export default function InspeksiKamtibPage() {
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Masa Berlaku *</label>
-          <input type="date" name="masaBerlakuSIMPetugas1" value={formData.masaBerlakuSIMPetugas1} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-black" />
+          <input type="date" name="masaBerlakuSIMPetugas1" value={formData.masaBerlakuSIMPetugas1} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-yellow-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Foto SIM *</label>
@@ -798,7 +798,7 @@ export default function InspeksiKamtibPage() {
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Masa Berlaku *</label>
-          <input type="date" name="masaBerlakuSIMPetugas2" value={formData.masaBerlakuSIMPetugas2} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-black" />
+          <input type="date" name="masaBerlakuSIMPetugas2" value={formData.masaBerlakuSIMPetugas2} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Foto SIM *</label>
@@ -824,7 +824,7 @@ export default function InspeksiKamtibPage() {
       <div className="bg-white rounded-lg shadow-md p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Tanggal Service *</label>
-          <input type="date" name="tanggalService" value={formData.tanggalService} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-black" />
+          <input type="date" name="tanggalService" value={formData.tanggalService} onChange={handleInputChange} required className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-orange-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium" />
         </div>
         <div>
           <label className="block text-sm font-medium text-gray-700 mb-2">Foto Bukti Service *</label>
@@ -859,7 +859,7 @@ export default function InspeksiKamtibPage() {
             min="0"
             placeholder="Contoh: 1, 1.5, 2"
             required 
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-black" 
+            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-cyan-500 focus:border-transparent text-black placeholder:text-gray-700 placeholder:font-medium" 
           />
           <p className="text-xs text-gray-500 mt-1">* Masukkan jumlah dalam BAR (bisa desimal, contoh: 1.5)</p>
         </div>
@@ -940,11 +940,11 @@ export default function InspeksiKamtibPage() {
       <div className="bg-blue-50 border-l-4 border-blue-700 p-6 rounded">
         <h4 className="font-bold text-blue-800 mb-3">📊 Ringkasan Inspeksi</h4>
         <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
-          <div><p className="text-gray-600">Petugas 1:</p><p className="font-semibold text-gray-800">{formData.namaPetugas1}</p></div>
-          <div><p className="text-gray-600">Plat Nomor:</p><p className="font-semibold text-gray-800">{formData.platNomor}</p></div>
-          <div><p className="text-gray-600">Lokasi:</p><p className="font-semibold text-gray-800">{formData.lokasiInspeksi}</p></div>
-          <div><p className="text-gray-600">Kelengkapan Petugas:</p><p className="font-semibold text-gray-800">{Object.values(formData.kelengkapanSarana).filter(item => item?.ada).length} / {kelengkapanSaranaKamtib.length} item</p></div>
-          <div><p className="text-gray-600">Kelengkapan Kendaraan:</p><p className="font-semibold text-gray-800">{Object.values(formData.kelengkapanKendaraan).filter(item => item?.ada).length} / {kelengkapanKendaraanUmum.length} item</p></div>
+          <div><p className="text-gray-800 font-semibold">Petugas 1:</p><p className="font-semibold text-gray-800">{formData.namaPetugas1}</p></div>
+          <div><p className="text-gray-800 font-semibold">Plat Nomor:</p><p className="font-semibold text-gray-800">{formData.platNomor}</p></div>
+          <div><p className="text-gray-800 font-semibold">Lokasi:</p><p className="font-semibold text-gray-800">{formData.lokasiInspeksi}</p></div>
+          <div><p className="text-gray-800 font-semibold">Kelengkapan Petugas:</p><p className="font-semibold text-gray-800">{Object.values(formData.kelengkapanSarana).filter(item => item?.ada).length} / {kelengkapanSaranaKamtib.length} item</p></div>
+          <div><p className="text-gray-800 font-semibold">Kelengkapan Kendaraan:</p><p className="font-semibold text-gray-800">{Object.values(formData.kelengkapanKendaraan).filter(item => item?.ada).length} / {kelengkapanKendaraanUmum.length} item</p></div>
         </div>
       </div>
 
@@ -974,10 +974,10 @@ export default function InspeksiKamtibPage() {
                   <img src="/logo/logo_jjc.png" alt="Logo Jasamarga" className="w-35 h-35 object-contain" />
                 </div>
                 <div className="flex-1">
-                  <h1 className="text-2xl font-bold text-black mb-2 uppercase" style={{ color: 'black' }}>
+                  <h1 className="text-2xl font-bold text-black mb-2 uppercase placeholder:text-gray-700 placeholder:font-medium" style={{ color: 'black' }}>
                     PT JASAMARGA JALANLAYANG CIKAMPEK
                   </h1>
-                  <h2 className="text-base font-semibold text-black uppercase" style={{ color: 'black' }}>
+                  <h2 className="text-base font-semibold text-black uppercase placeholder:text-gray-700 placeholder:font-medium" style={{ color: 'black' }}>
                     Inspeksi Periodik Kendaraan Layanan Operasi
                   </h2>
                 </div>
@@ -991,7 +991,7 @@ export default function InspeksiKamtibPage() {
                   <table className="w-full text-sm">
                     <tbody>
                       <tr>
-                        <td className="py-1 pr-3 text-black font-medium" style={{ width: '100px' }}>HARI</td>
+                        <td className="py-1 pr-3 text-black font-medium placeholder:text-gray-700 placeholder:font-medium" style={{ width: '100px' }}>HARI</td>
                         <td className="py-1 text-black">: {new Date().toLocaleDateString('id-ID', { weekday: 'long' })}</td>
                       </tr>
                       <tr>
@@ -1005,7 +1005,7 @@ export default function InspeksiKamtibPage() {
                   <table className="w-full text-sm">
                     <tbody>
                       <tr>
-                        <td className="py-1 pr-3 text-black font-medium" style={{ width: '100px' }}>UNIT</td>
+                        <td className="py-1 pr-3 text-black font-medium placeholder:text-gray-700 placeholder:font-medium" style={{ width: '100px' }}>UNIT</td>
                         <td className="py-1 text-black">: <span className="font-bold">KAMTIB</span></td>
                       </tr>
                       <tr>
@@ -1043,7 +1043,7 @@ export default function InspeksiKamtibPage() {
             </div>
 
             {/* Kelengkapan Petugas */}
-            <div className="bg-gray-200 border-b-2 border-black p-2 font-bold text-sm uppercase text-black" style={{ color: 'black' }}>
+            <div className="bg-gray-200 border-b-2 border-black p-2 font-bold text-sm uppercase text-black placeholder:text-gray-700 placeholder:font-medium" style={{ color: 'black' }}>
               KELENGKAPAN PETUGAS
             </div>
             {kelengkapanSaranaKamtib.map((item, index) => {
@@ -1083,7 +1083,7 @@ export default function InspeksiKamtibPage() {
             })}
 
             {/* Kelengkapan Sarana */}
-            <div className="bg-gray-200 border-b-2 border-black p-2 font-bold text-sm uppercase text-black" style={{ color: 'black' }}>
+            <div className="bg-gray-200 border-b-2 border-black p-2 font-bold text-sm uppercase text-black placeholder:text-gray-700 placeholder:font-medium" style={{ color: 'black' }}>
               KELENGKAPAN KENDARAAN
             </div>
             {kelengkapanKendaraanUmum.map((item, index) => {
@@ -1123,7 +1123,7 @@ export default function InspeksiKamtibPage() {
             })}
 
             {/* Masa Berlaku Dokumen */}
-            <div className="bg-gray-200 border-b-2 border-black p-2 font-bold text-sm uppercase text-black" style={{ color: 'black' }}>
+            <div className="bg-gray-200 border-b-2 border-black p-2 font-bold text-sm uppercase text-black placeholder:text-gray-700 placeholder:font-medium" style={{ color: 'black' }}>
               MASA BERLAKU DOKUMEN
             </div>
             <div className="border-b-2 border-black">
@@ -1252,10 +1252,10 @@ export default function InspeksiKamtibPage() {
                           <img src="/logo/logo_jjc.png" alt="Logo Jasamarga" className="w-35 h-35 object-contain" />
                         </div>
                         <div className="flex-1">
-                          <h1 className="text-2xl font-bold text-black mb-2 uppercase" style={{ color: 'black' }}>
+                          <h1 className="text-2xl font-bold text-black mb-2 uppercase placeholder:text-gray-700 placeholder:font-medium" style={{ color: 'black' }}>
                             PT JASAMARGA JALANLAYANG CIKAMPEK
                           </h1>
-                          <h2 className="text-base font-semibold text-black uppercase" style={{ color: 'black' }}>
+                          <h2 className="text-base font-semibold text-black uppercase placeholder:text-gray-700 placeholder:font-medium" style={{ color: 'black' }}>
                             Lampiran Bukti Dokumen - Halaman {pageIndex + 1}
                           </h2>
                         </div>
@@ -1264,7 +1264,7 @@ export default function InspeksiKamtibPage() {
 
                     {/* Content Lampiran */}
                     <div className="p-6">
-                      <div className="mb-4 text-sm text-black" style={{ color: 'black' }}>
+                      <div className="mb-4 text-sm text-black placeholder:text-gray-700 placeholder:font-medium" style={{ color: 'black' }}>
                         <p><strong>No. Polisi:</strong> {formData.platNomor || "-"}</p>
                         <p><strong>Unit:</strong> KAMTIB</p>
                         <p><strong>Tanggal Inspeksi:</strong> {new Date().toLocaleDateString('id-ID', { day: '2-digit', month: 'long', year: 'numeric' })}</p>
@@ -1273,7 +1273,7 @@ export default function InspeksiKamtibPage() {
                       <div className="space-y-6">
                         {chunk.map((photo, index) => (
                           <div key={index} className="border-2 border-gray-300 p-4 rounded">
-                            <h3 className="font-bold text-sm mb-3 uppercase text-center bg-gray-200 p-2 text-black" style={{ color: 'black' }}>
+                            <h3 className="font-bold text-sm mb-3 uppercase text-center bg-gray-200 p-2 text-black placeholder:text-gray-700 placeholder:font-medium" style={{ color: 'black' }}>
                               Bukti Dokumen: {photo.label}
                             </h3>
                             <div className="flex justify-center items-center bg-gray-50 p-4" style={{ minHeight: '300px', maxHeight: '400px' }}>
@@ -1289,7 +1289,7 @@ export default function InspeksiKamtibPage() {
                                 />
                               )}
                             </div>
-                            <p className="text-xs text-center mt-2 text-black italic" style={{ color: 'black' }}>
+                            <p className="text-xs text-center mt-2 text-black italic placeholder:text-gray-700 placeholder:font-medium" style={{ color: 'black' }}>
                               Foto dokumen {photo.label} - Kendaraan {formData.platNomor || "-"}
                             </p>
                           </div>
@@ -1335,7 +1335,7 @@ export default function InspeksiKamtibPage() {
         <div className="bg-white rounded-lg shadow-lg p-8 text-center">
           <div className="animate-spin rounded-full h-16 w-16 border-b-4 border-indigo-600 mx-auto mb-4"></div>
           <h2 className="text-xl font-bold text-gray-800 mb-2">Memuat Draft...</h2>
-          <p className="text-gray-600">Mohon tunggu sebentar</p>
+          <p className="text-gray-800 font-semibold">Mohon tunggu sebentar</p>
         </div>
       </div>
     );
@@ -1411,3 +1411,7 @@ export default function InspeksiKamtibPage() {
     </div>
   );
 }
+
+
+
+

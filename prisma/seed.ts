@@ -6,7 +6,11 @@ const prisma = new PrismaClient();
 async function main() {
   console.log("🌱 Starting seed...");
 
-  // Clear existing data
+  // Clear existing data (hapus inspeksi dulu karena foreign key)
+  await prisma.komentar.deleteMany();
+  console.log("🗑️  Cleared existing komentars");
+  await prisma.inspeksi.deleteMany();
+  console.log("🗑️  Cleared existing inspeksi");
   await prisma.user.deleteMany();
   console.log("🗑️  Cleared existing users");
 
@@ -15,7 +19,7 @@ async function main() {
   // ===========================================
   const managerTraffic1 = await prisma.user.create({
     data: {
-      email: "manager.traffic@jasamarga.com",
+      email: "armasuka10@gmail.com",
       password: await bcrypt.hash("password123", 10),
       name: "Budi Santoso",
       role: "MANAGER_TRAFFIC",
@@ -36,7 +40,7 @@ async function main() {
   // ===========================================
   const managerOperational1 = await prisma.user.create({
     data: {
-      email: "manager.operational@jasamarga.com",
+      email: "cadelldell11@gmail.com",
       password: await bcrypt.hash("password123", 10),
       name: "Andi Wijaya",
       role: "MANAGER_OPERATIONAL",

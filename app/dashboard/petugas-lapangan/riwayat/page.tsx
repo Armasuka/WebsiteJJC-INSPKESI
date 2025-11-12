@@ -1,8 +1,9 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
+import { PieChart, Pie, Cell, BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from "recharts";
 
 interface Inspeksi {
   id: string;
@@ -11,10 +12,19 @@ interface Inspeksi {
   lokasiInspeksi: string;
   status: string;
   tanggalInspeksi: string;
+  approvedAtOperational?: string;
   namaPetugas: string;
 }
 
-type PeriodFilter = "today" | "week" | "month" | "custom" | "all";
+type PeriodFilter = "today" | "week" | "month" | "year" | "custom" | "all";
+type ActiveTab = "list" | "visualization";
+
+const COLORS = {
+  DEREK: "#FF6B6B",
+  PLAZA: "#4ECDC4",
+  KAMTIB: "#FFD93D",
+  RESCUE: "#6C5CE7",
+};
 
 export default function RiwayatInspeksiPage() {
   const router = useRouter();
@@ -27,6 +37,11 @@ export default function RiwayatInspeksiPage() {
   const [customStartDate, setCustomStartDate] = useState("");
   const [customEndDate, setCustomEndDate] = useState("");
   const [searchQuery, setSearchQuery] = useState("");
+  const [activeTab, setActiveTab] = useState<ActiveTab>("list");
+  
+  // Visualization data
+  const [chartData, setChartData] = useState<any[]>([]);
+  const [totalApprovedInspeksi, setTotalApprovedInspeksi] = useState(0);
 
   useEffect(() => {
     fetchInspeksi();
@@ -35,6 +50,10 @@ export default function RiwayatInspeksiPage() {
   useEffect(() => {
     applyFilters();
   }, [inspeksi, statusFilter, kategoriFilter, periodFilter, customStartDate, customEndDate, searchQuery]);
+
+  useEffect(() => {
+    calculateVisualizationData();
+  }, [filteredInspeksi]);
 
   const fetchInspeksi = async () => {
     try {
@@ -119,6 +138,12 @@ export default function RiwayatInspeksiPage() {
           const itemDate = new Date(item.tanggalInspeksi);
           return itemDate >= monthStart && itemDate <= now;
         });
+      } else if (periodFilter === "year") {
+        const yearStart = new Date(now.getFullYear(), 0, 1);
+        filtered = filtered.filter((item) => {
+          const itemDate = new Date(item.tanggalInspeksi);
+          return itemDate >= yearStart && itemDate <= now;
+        });
       } else if (periodFilter === "custom" && customStartDate && customEndDate) {
         const startDate = new Date(customStartDate);
         const endDate = new Date(customEndDate);
@@ -131,6 +156,26 @@ export default function RiwayatInspeksiPage() {
     }
 
     setFilteredInspeksi(filtered);
+  };
+
+  const calculateVisualizationData = () => {
+    // Hitung data untuk approved inspeksi saja
+    const approvedInspeksi = filteredInspeksi.filter(i => i.status === "APPROVED_BY_OPERATIONAL");
+    
+    const aggregated: Record<string, number> = {};
+    approvedInspeksi.forEach((item) => {
+      aggregated[item.kategoriKendaraan] = (aggregated[item.kategoriKendaraan] || 0) + 1;
+    });
+
+    const total = approvedInspeksi.length;
+    const chartDataArray = Object.entries(aggregated).map(([kategori, count]) => ({
+      name: kategori,
+      value: count,
+      percentage: total > 0 ? ((count / total) * 100).toFixed(1) : "0",
+    }));
+
+    setChartData(chartDataArray);
+    setTotalApprovedInspeksi(total);
   };
 
   const handleExport = () => {
@@ -177,13 +222,39 @@ export default function RiwayatInspeksiPage() {
           <h2 className="text-3xl font-bold text-gray-900 mb-2">
             Riwayat Inspeksi Kendaraan
           </h2>
-          <p className="text-gray-600">Daftar lengkap semua inspeksi dengan filter periode & status</p>
+          <p className="text-gray-800 font-medium">Daftar lengkap semua inspeksi dengan filter periode & status</p>
         </div>
         <Link href="/dashboard/petugas-lapangan/inspeksi">
           <button className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 font-medium shadow-sm">
             Inspeksi Baru
           </button>
         </Link>
+      </div>
+
+      {/* Tabs */}
+      <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
+        <div className="flex border-b border-gray-200">
+          <button
+            onClick={() => setActiveTab("list")}
+            className={`flex-1 px-6 py-4 font-medium transition-colors duration-200 relative ${
+              activeTab === "list"
+                ? "text-purple-600 border-b-2 border-purple-600 bg-purple-50"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+            }`}
+          >
+            📋 Daftar Riwayat
+          </button>
+          <button
+            onClick={() => setActiveTab("visualization")}
+            className={`flex-1 px-6 py-4 font-medium transition-colors duration-200 ${
+              activeTab === "visualization"
+                ? "text-purple-600 border-b-2 border-purple-600 bg-purple-50"
+                : "text-gray-600 hover:text-gray-900 hover:bg-gray-50"
+            }`}
+          >
+            📊 Visualisasi Data ACC
+          </button>
+        </div>
       </div>
 
       {/* Filters */}
@@ -210,7 +281,7 @@ export default function RiwayatInspeksiPage() {
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
             placeholder="Contoh: B 1234 XYZ"
-            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent bg-white transition-colors duration-200"
+            className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent bg-white transition-colors duration-200 text-gray-900 font-medium"
           />
         </div>
         
@@ -222,12 +293,13 @@ export default function RiwayatInspeksiPage() {
             <select
               value={periodFilter}
               onChange={(e) => setPeriodFilter(e.target.value as PeriodFilter)}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent bg-white transition-colors duration-200"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent bg-white transition-colors duration-200 text-gray-900 font-medium"
             >
               <option value="all">Semua Waktu</option>
               <option value="today">Hari Ini</option>
               <option value="week">Minggu Ini (7 Hari Terakhir)</option>
               <option value="month">Bulan Ini</option>
+              <option value="year">Tahun Ini</option>
               <option value="custom">Custom Tanggal</option>
             </select>
           </div>
@@ -239,7 +311,7 @@ export default function RiwayatInspeksiPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-colors duration-200"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-colors duration-200 text-gray-900 font-medium"
             >
               <option value="ALL">Semua Status</option>
               <option value="DRAFT">Draft</option>
@@ -257,7 +329,7 @@ export default function RiwayatInspeksiPage() {
             <select
               value={kategoriFilter}
               onChange={(e) => setKategoriFilter(e.target.value)}
-              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-colors duration-200"
+              className="w-full px-4 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-colors duration-200 text-gray-900 font-medium"
             >
               <option value="ALL">Semua Kategori</option>
               <option value="PLAZA">Plaza</option>
@@ -279,7 +351,7 @@ export default function RiwayatInspeksiPage() {
                 type="date"
                 value={customStartDate}
                 onChange={(e) => setCustomStartDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-colors duration-200"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-colors duration-200 text-gray-900 font-medium"
               />
             </div>
             <div>
@@ -290,7 +362,7 @@ export default function RiwayatInspeksiPage() {
                 type="date"
                 value={customEndDate}
                 onChange={(e) => setCustomEndDate(e.target.value)}
-                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-colors duration-200"
+                className="w-full px-3 py-2 border border-gray-200 rounded-lg focus:ring-2 focus:ring-purple-600 focus:border-transparent transition-colors duration-200 text-gray-900 font-medium"
               />
             </div>
           </div>
@@ -305,29 +377,161 @@ export default function RiwayatInspeksiPage() {
         </div>
       </div>
 
-      {/* Summary per Kategori */}
-      {filteredInspeksi.length > 0 && (
+      {/* Content berdasarkan tab aktif */}
+      {activeTab === "visualization" ? (
+        /* VISUALISASI DATA ACC */
+        <div className="space-y-6">
+          {/* Summary Card */}
+          <div className="bg-gradient-to-r from-purple-50 to-indigo-50 rounded-lg p-6 border border-purple-200 shadow-sm">
+            <h3 className="text-2xl font-bold text-gray-900 mb-2">
+              Total Inspeksi yang di-ACC
+            </h3>
+            <p className="text-5xl font-bold text-purple-600">{totalApprovedInspeksi}</p>
+            <p className="text-sm text-gray-700 font-medium mt-2">
+              Dari total {filteredInspeksi.length} inspeksi yang ditampilkan (filter aktif)
+            </p>
+            <p className="text-xs text-gray-700 mt-1">
+              Periode: {periodFilter === "all" && "Semua Waktu"}
+              {periodFilter === "today" && "Hari Ini"}
+              {periodFilter === "week" && "Minggu Ini"}
+              {periodFilter === "month" && "Bulan Ini"}
+              {periodFilter === "year" && "Tahun Ini"}
+              {periodFilter === "custom" && `${customStartDate} s/d ${customEndDate}`}
+              {kategoriFilter !== "ALL" && ` • ${kategoriFilter}`}
+            </p>
+          </div>
+
+          {chartData.length > 0 ? (
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Pie Chart */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                <h4 className="font-bold text-lg mb-4 text-gray-900">
+                  📊 Distribusi per Kategori (Pie Chart)
+                </h4>
+                <ResponsiveContainer width="100%" height={300}>
+                  <PieChart>
+                    <Pie
+                      data={chartData}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={(entry) => `${entry.name}: ${entry.percentage}%`}
+                      outerRadius={100}
+                      fill="#8884d8"
+                      dataKey="value"
+                    >
+                      {chartData.map((entry, index) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={COLORS[entry.name as keyof typeof COLORS] || "#8884d8"}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="mt-4 grid grid-cols-2 gap-2">
+                  {chartData.map((item) => (
+                    <div key={item.name} className="flex items-center gap-2">
+                      <div
+                        className="w-4 h-4 rounded"
+                        style={{
+                          backgroundColor: COLORS[item.name as keyof typeof COLORS] || "#8884d8",
+                        }}
+                      ></div>
+                      <span className="text-sm text-gray-700">
+                        {item.name}: {item.value} ({item.percentage}%)
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Bar Chart */}
+              <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+                <h4 className="font-bold text-lg mb-4 text-gray-900">
+                  📈 Jumlah per Kategori (Bar Chart)
+                </h4>
+                <ResponsiveContainer width="100%" height={300}>
+                  <BarChart data={chartData}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis dataKey="name" />
+                    <YAxis />
+                    <Tooltip />
+                    <Legend />
+                    <Bar dataKey="value" fill="#9333EA" name="Jumlah Inspeksi ACC" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            </div>
+          ) : (
+            <div className="text-center py-12 bg-gray-50 rounded-lg border border-gray-200">
+              <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+              </svg>
+              <p className="text-gray-800 font-semibold text-lg">Tidak ada data inspeksi ACC untuk divisualisasikan</p>
+              <p className="text-sm text-gray-700 mt-2">
+                Coba ubah filter periode atau kategori untuk melihat data yang sudah di-ACC
+              </p>
+            </div>
+          )}
+
+          {/* Detailed Breakdown */}
+          {chartData.length > 0 && (
+            <div className="bg-white rounded-lg border border-gray-200 p-6 shadow-sm">
+              <h4 className="font-bold text-lg mb-4 text-gray-900">📋 Detail per Kategori</h4>
+              <div className="space-y-2">
+                {chartData.map((item, idx) => (
+                  <div
+                    key={idx}
+                    className="flex items-center justify-between p-4 bg-gray-50 rounded-lg border border-gray-200 hover:bg-gray-100 transition-colors duration-200"
+                  >
+                    <div className="flex items-center gap-3">
+                      <div
+                        className="w-6 h-6 rounded"
+                        style={{
+                          backgroundColor: COLORS[item.name as keyof typeof COLORS] || "#8884d8",
+                        }}
+                      ></div>
+                      <span className="font-semibold text-gray-900">{item.name}</span>
+                    </div>
+                    <div className="text-right">
+                      <span className="font-bold text-purple-600 text-xl">{item.value}</span>
+                      <span className="text-sm text-gray-700 font-medium ml-2">inspeksi</span>
+                      <span className="text-xs text-gray-700 ml-2">({item.percentage}%)</span>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      ) : (
+        /* DAFTAR RIWAYAT */
+        <div className="space-y-6">
+          {/* Summary per Kategori */}
+          {filteredInspeksi.length > 0 && (
         <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           <div className="bg-blue-50 rounded-lg p-3 text-center border border-blue-200 shadow-sm">
-            <p className="text-xs text-gray-600 font-medium mb-1">Plaza</p>
+            <p className="text-xs text-gray-800 font-semibold mb-1">Plaza</p>
             <p className="text-2xl font-bold text-blue-600">
               {filteredInspeksi.filter(i => i.kategoriKendaraan === "PLAZA").length}
             </p>
           </div>
           <div className="bg-yellow-50 rounded-lg p-3 text-center border border-yellow-200 shadow-sm">
-            <p className="text-xs text-gray-600 font-medium mb-1">Derek</p>
+            <p className="text-xs text-gray-800 font-semibold mb-1">Derek</p>
             <p className="text-2xl font-bold text-yellow-600">
               {filteredInspeksi.filter(i => i.kategoriKendaraan === "DEREK").length}
             </p>
           </div>
           <div className="bg-green-50 rounded-lg p-3 text-center border border-green-200 shadow-sm">
-            <p className="text-xs text-gray-600 font-medium mb-1">Kamtib</p>
+            <p className="text-xs text-gray-800 font-semibold mb-1">Kamtib</p>
             <p className="text-2xl font-bold text-green-600">
               {filteredInspeksi.filter(i => i.kategoriKendaraan === "KAMTIB").length}
             </p>
           </div>
           <div className="bg-orange-50 rounded-lg p-3 text-center border border-orange-200 shadow-sm">
-            <p className="text-xs text-gray-600 font-medium mb-1">Rescue</p>
+            <p className="text-xs text-gray-800 font-semibold mb-1">Rescue</p>
             <p className="text-2xl font-bold text-orange-600">
               {filteredInspeksi.filter(i => i.kategoriKendaraan === "RESCUE").length}
             </p>
@@ -446,29 +650,34 @@ export default function RiwayatInspeksiPage() {
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="text-center bg-gray-50 rounded-lg p-4 border border-gray-200">
               <p className="text-2xl font-bold text-gray-700">{filteredInspeksi.length}</p>
-              <p className="text-xs text-gray-600 font-medium">Total Kendaraan</p>
+              <p className="text-xs text-gray-800 font-semibold">Total Kendaraan</p>
             </div>
             <div className="text-center bg-green-50 rounded-lg p-4 border border-green-200">
               <p className="text-2xl font-bold text-green-600">
                 {filteredInspeksi.filter(i => i.status === "APPROVED").length}
               </p>
-              <p className="text-xs text-gray-600 font-medium">Disetujui</p>
+              <p className="text-xs text-gray-800 font-semibold">Disetujui</p>
             </div>
             <div className="text-center bg-yellow-50 rounded-lg p-4 border border-yellow-200">
               <p className="text-2xl font-bold text-yellow-600">
                 {filteredInspeksi.filter(i => i.status === "SUBMITTED").length}
               </p>
-              <p className="text-xs text-gray-600 font-medium">Pending</p>
+              <p className="text-xs text-gray-800 font-semibold">Pending</p>
             </div>
             <div className="text-center bg-blue-50 rounded-lg p-4 border border-blue-200">
               <p className="text-2xl font-bold text-blue-700">
                 {new Set(filteredInspeksi.map(i => i.kategoriKendaraan)).size}
               </p>
-              <p className="text-xs text-gray-600 font-medium">Jenis Kendaraan</p>
+              <p className="text-xs text-gray-800 font-semibold">Jenis Kendaraan</p>
             </div>
           </div>
+        </div>
+          )}
         </div>
       )}
     </div>
   );
 }
+
+
+

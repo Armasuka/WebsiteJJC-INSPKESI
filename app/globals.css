@@ -61,8 +61,25 @@ body {
   }
 }
 
+@keyframes fade-blur-in {
+  from {
+    opacity: 0;
+    filter: blur(10px);
+    transform: translateY(20px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    filter: blur(0);
+    transform: translateY(0) scale(1);
+  }
+}
+
 .animate-fadeIn {
   animation: fadeIn 0.5s ease-out;
+}
+
+.animate-fade-blur-in {
+  animation: fade-blur-in 0.6s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
 .animate-slide-in {
@@ -207,3 +224,206 @@ body {
     break-after: page !important;
   }
 }
+
+/* Scrollbar Styling */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
+}
+
+/* Custom Sidebar Scrollbar */
+aside::-webkit-scrollbar {
+  width: 6px;
+}
+
+aside::-webkit-scrollbar-track {
+  background: #f9fafb;
+}
+
+aside::-webkit-scrollbar-thumb {
+  background: #d1d5db;
+  border-radius: 10px;
+}
+
+aside::-webkit-scrollbar-thumb:hover {
+  background: #9ca3af;
+}
+
+/* Smooth transitions */
+* {
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ===== RESPONSIVE UTILITIES ===== */
+
+/* Mobile-first approach */
+@media (max-width: 640px) {
+  /* Reduce padding on small screens */
+  .responsive-padding {
+    padding: 1rem !important;
+  }
+  
+  /* Stack columns on mobile */
+  .mobile-stack {
+    grid-template-columns: 1fr !important;
+  }
+  
+  /* Hide text on mobile, show icons only */
+  .mobile-hide-text {
+    font-size: 0 !important;
+  }
+  
+  /* Smaller font sizes for mobile */
+  h1 {
+    font-size: 1.5rem !important;
+  }
+  
+  h2 {
+    font-size: 1.25rem !important;
+  }
+  
+  h3 {
+    font-size: 1.125rem !important;
+  }
+  
+  /* Better touch targets */
+  button, a {
+    min-height: 44px;
+    min-width: 44px;
+  }
+  
+  /* Smaller card padding on mobile */
+  .card-mobile {
+    padding: 0.75rem !important;
+  }
+  
+  /* Full width buttons on mobile */
+  .mobile-full-width {
+    width: 100% !important;
+  }
+  
+  /* Smaller charts on mobile */
+  .recharts-wrapper {
+    max-width: 100% !important;
+  }
+}
+
+/* Tablet screens */
+@media (min-width: 641px) and (max-width: 1024px) {
+  /* Adjust sidebar width for tablets */
+  aside {
+    width: 240px !important;
+  }
+  
+  /* 2 columns on tablet */
+  .tablet-two-cols {
+    grid-template-columns: repeat(2, 1fr) !important;
+  }
+}
+
+/* Prevent text overflow */
+.text-truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/* Responsive image containers */
+.responsive-img-container {
+  position: relative;
+  width: 100%;
+  height: auto;
+  overflow: hidden;
+}
+
+.responsive-img-container img {
+  width: 100%;
+  height: auto;
+  object-fit: cover;
+}
+
+/* Flex utilities for responsive */
+.flex-mobile-col {
+  display: flex;
+}
+
+@media (max-width: 640px) {
+  .flex-mobile-col {
+    flex-direction: column !important;
+  }
+}
+
+/* Responsive table */
+@media (max-width: 768px) {
+  .responsive-table {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .responsive-table table {
+    min-width: 600px;
+  }
+}
+
+/* Hide elements on specific breakpoints */
+@media (max-width: 640px) {
+  .hide-on-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 641px) {
+  .show-on-mobile {
+    display: none !important;
+  }
+}
+
+@media (min-width: 641px) and (max-width: 1024px) {
+  .hide-on-tablet {
+    display: none !important;
+  }
+}
+
+/* Responsive grid gaps */
+@media (max-width: 640px) {
+  .responsive-gap {
+    gap: 0.75rem !important;
+  }
+}
+
+/* Responsive modal */
+@media (max-width: 640px) {
+  .responsive-modal {
+    width: calc(100% - 2rem) !important;
+    max-width: 100% !important;
+    margin: 1rem !important;
+  }
+}
+
+/* Safe area for mobile devices with notches */
+@supports (padding: env(safe-area-inset-bottom)) {
+  .safe-bottom {
+    padding-bottom: env(safe-area-inset-bottom) !important;
+  }
+  
+  .safe-top {
+    padding-top: env(safe-area-inset-top) !important;
+  }
+}
+

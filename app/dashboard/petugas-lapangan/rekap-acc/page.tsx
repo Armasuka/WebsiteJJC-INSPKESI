@@ -5,6 +5,7 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import * as XLSX from 'xlsx';
+import ToastNotification from "@/app/components/ToastNotification";
 
 interface InspeksiItem {
   id: string;
@@ -17,6 +18,8 @@ interface InspeksiItem {
   nipPetugas2: string | null;
   pdfUrl: string | null;
   approvedAtOperational: string;
+  approvedAtTraffic: string | null;
+  status: string;
 }
 
 export default function RekapAccPage() {
@@ -36,8 +39,15 @@ export default function RekapAccPage() {
   const [showSendModal, setShowSendModal] = useState(false);
   const [sending, setSending] = useState(false);
   const [judulRekap, setJudulRekap] = useState("");
-  const [receiverRole, setReceiverRole] = useState<string>("BOTH");
+  const [receiverRole] = useState<string>("OPERATIONAL"); // Fixed to OPERATIONAL only
   const [catatan, setCatatan] = useState("");
+
+  // Toast notification state
+  const [toast, setToast] = useState<{ message: string; type: "success" | "error" | "warning" | "info" } | null>(null);
+
+  const showToast = (message: string, type: "success" | "error" | "warning" | "info" = "success") => {
+    setToast({ message, type });
+  };
 
   useEffect(() => {
     fetchData();
@@ -49,20 +59,27 @@ export default function RekapAccPage() {
 
   const fetchData = async () => {
     try {
-      const response = await fetch("/api/inspeksi?status=APPROVED_BY_OPERATIONAL&limit=1000");
+      // Fetch semua inspeksi yang sudah di-approve (baik oleh Traffic saja atau keduanya)
+      const response = await fetch("/api/inspeksi?limit=1000");
       if (response.ok) {
         const result = await response.json();
         
         // API now returns { data: [...], pagination: {...} }
         const dataArray = result.data || [];
         
-        // Sort by approval date
-        const approved = dataArray.sort((a: any, b: any) => 
-          new Date(b.approvedAtOperational || b.tanggalInspeksi).getTime() - 
-          new Date(a.approvedAtOperational || a.tanggalInspeksi).getTime()
+        // Filter hanya yang sudah di-ACC (minimal oleh Traffic)
+        const approved = dataArray.filter((item: any) => 
+          item.status === 'APPROVED_BY_TRAFFIC' || item.status === 'APPROVED_BY_OPERATIONAL'
         );
         
-        setInspeksi(approved);
+        // Sort by approval date (prioritas operational, fallback ke traffic)
+        const sorted = approved.sort((a: any, b: any) => {
+          const dateA = new Date(a.approvedAtOperational || a.approvedAtTraffic || a.tanggalInspeksi).getTime();
+          const dateB = new Date(b.approvedAtOperational || b.approvedAtTraffic || b.tanggalInspeksi).getTime();
+          return dateB - dateA;
+        });
+        
+        setInspeksi(sorted);
       }
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -100,7 +117,8 @@ export default function RekapAccPage() {
             to.setHours(23, 59, 59, 999);
             
             filtered = filtered.filter((item) => {
-              const itemDate = new Date(item.approvedAtOperational || item.tanggalInspeksi);
+              // Gunakan tanggal approval (operational atau traffic, fallback ke tanggal inspeksi)
+              const itemDate = new Date(item.approvedAtOperational || item.approvedAtTraffic || item.tanggalInspeksi);
               return itemDate >= from && itemDate <= to;
             });
           }
@@ -111,7 +129,8 @@ export default function RekapAccPage() {
 
       if (periodFilter !== "custom") {
         filtered = filtered.filter((item) => {
-          const itemDate = new Date(item.approvedAtOperational || item.tanggalInspeksi);
+          // Gunakan tanggal approval (operational atau traffic, fallback ke tanggal inspeksi)
+          const itemDate = new Date(item.approvedAtOperational || item.approvedAtTraffic || item.tanggalInspeksi);
           return itemDate >= startDate;
         });
       }
@@ -126,29 +145,37 @@ export default function RekapAccPage() {
   };
 
   const getKategoriIcon = (kategori: string) => {
-    const icons: Record<string, string> = {
-      PLAZA: "🏢",
-      DEREK: "🚚",
-      KAMTIB: "🛡️",
-      RESCUE: "🚒",
+    const icons: Record<string, React.ReactElement> = {
+      PLAZA: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" /></svg>,
+      DEREK: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>,
+      KAMTIB: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>,
+      RESCUE: <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>,
     };
-    return icons[kategori] || "🚗";
+    return icons[kategori] || <svg className="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7v8a2 2 0 002 2h6M8 7V5a2 2 0 012-2h4.586a1 1 0 01.707.293l4.414 4.414a1 1 0 01.293.707V15a2 2 0 01-2 2h-2M8 7H6a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2v-2" /></svg>;
   };
 
   const exportToExcel = () => {
-    const exportData = filteredInspeksi.map((item, index) => ({
-      "No": index + 1,
-      "Tanggal": new Date(item.approvedAtOperational).toLocaleDateString("id-ID", {
-        day: "2-digit",
-        month: "long",
-        year: "numeric",
-      }),
-      "Kategori": item.kategoriKendaraan,
-      "No. Polisi": item.nomorKendaraan,
-      "Petugas 1": `${item.namaPetugas} (${item.nipPetugas})`,
-      "Petugas 2": item.namaPetugas2 ? `${item.namaPetugas2} (${item.nipPetugas2})` : "-",
-      "Status": "APPROVED",
-    }));
+    const exportData = filteredInspeksi.map((item, index) => {
+      // Gunakan tanggal approval yang sesuai
+      const approvalDate = item.approvedAtOperational || item.approvedAtTraffic || item.tanggalInspeksi;
+      const statusLabel = item.status === 'APPROVED_BY_OPERATIONAL' 
+        ? 'FULLY APPROVED' 
+        : 'APPROVED BY TRAFFIC';
+      
+      return {
+        "No": index + 1,
+        "Tanggal": new Date(approvalDate).toLocaleDateString("id-ID", {
+          day: "2-digit",
+          month: "long",
+          year: "numeric",
+        }),
+        "Kategori": item.kategoriKendaraan,
+        "No. Polisi": item.nomorKendaraan,
+        "Petugas 1": `${item.namaPetugas} (${item.nipPetugas})`,
+        "Petugas 2": item.namaPetugas2 ? `${item.namaPetugas2} (${item.nipPetugas2})` : "-",
+        "Status": statusLabel,
+      };
+    });
 
     const ws = XLSX.utils.json_to_sheet(exportData);
     const wb = XLSX.utils.book_new();
@@ -156,6 +183,49 @@ export default function RekapAccPage() {
     
     const fileName = `Rekap_Inspeksi_ACC_${new Date().toISOString().split('T')[0]}.xlsx`;
     XLSX.writeFile(wb, fileName);
+  };
+
+  const handleDownloadPDF = async (inspeksiId: string, nomorKendaraan: string) => {
+    try {
+      // Show loading indicator
+      const button = document.querySelector(`button[data-pdf-id="${inspeksiId}"]`) as HTMLButtonElement;
+      if (button) {
+        button.disabled = true;
+        button.textContent = "⏳ Generating...";
+      }
+
+      const response = await fetch(`/api/inspeksi/${inspeksiId}/generate-pdf`, {
+        method: 'POST',
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to generate PDF');
+      }
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `Inspeksi_${nomorKendaraan}_${new Date().toISOString().split('T')[0]}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      if (button) {
+        button.disabled = false;
+        button.textContent = "Cetak PDF";
+      }
+    } catch (error) {
+      console.error('Error downloading PDF:', error);
+      alert('Gagal mengunduh PDF. Silakan coba lagi.');
+      
+      const button = document.querySelector(`button[data-pdf-id="${inspeksiId}"]`) as HTMLButtonElement;
+      if (button) {
+        button.disabled = false;
+        button.textContent = "Cetak PDF";
+      }
+    }
   };
 
   const handleOpenSendModal = () => {
@@ -221,7 +291,7 @@ export default function RekapAccPage() {
         break;
       case "custom":
         if (!customDateFrom || !customDateTo) {
-          alert("Tanggal custom harus diisi");
+          showToast("Tanggal custom harus diisi", "warning");
           return;
         }
         tanggalMulai = new Date(customDateFrom);
@@ -230,7 +300,7 @@ export default function RekapAccPage() {
         periodeType = "KUSTOM";
         break;
       default:
-        alert("Pilih periode terlebih dahulu");
+        showToast("Pilih periode terlebih dahulu", "warning");
         return;
     }
 
@@ -254,17 +324,17 @@ export default function RekapAccPage() {
       });
 
       if (response.ok) {
-        alert("Rekap berhasil dikirim ke manager!");
+        showToast("Rekap berhasil dikirim ke manager! Email notifikasi telah terkirim", "success");
         setShowSendModal(false);
         setJudulRekap("");
         setCatatan("");
       } else {
         const error = await response.json();
-        alert(`Gagal mengirim rekap: ${error.error || "Unknown error"}`);
+        showToast(`Gagal mengirim rekap: ${error.error || "Unknown error"}`, "error");
       }
     } catch (error) {
       console.error("Error sending rekap:", error);
-      alert("Gagal mengirim rekap");
+      showToast("Gagal mengirim rekap", "error");
     } finally {
       setSending(false);
     }
@@ -372,7 +442,10 @@ export default function RekapAccPage() {
               disabled={filteredInspeksi.length === 0}
               className="px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg transition-colors duration-200 disabled:opacity-50 disabled:cursor-not-allowed flex items-center gap-2 shadow-sm"
             >
-              📤 Kirim ke Manager
+              <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+              </svg>
+              Kirim ke Manager
             </button>
             <button
               onClick={exportToExcel}
@@ -389,15 +462,15 @@ export default function RekapAccPage() {
       {loading ? (
         <div className="bg-white rounded-lg shadow-sm p-12 text-center border border-gray-200">
           <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-green-600 mx-auto"></div>
-          <p className="text-gray-500 mt-4">Memuat data...</p>
+          <p className="text-gray-700 mt-4 font-medium">Memuat data...</p>
         </div>
       ) : filteredInspeksi.length === 0 ? (
         <div className="bg-white rounded-lg shadow-sm p-12 text-center border border-gray-200">
           <svg className="w-16 h-16 text-gray-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
           </svg>
-          <p className="text-gray-600 font-medium">Tidak ada data inspeksi ACC</p>
-          <p className="text-sm text-gray-500 mt-2">
+          <p className="text-gray-800 font-semibold text-lg">Tidak ada data inspeksi ACC</p>
+          <p className="text-sm text-gray-700 mt-2">
             {periodFilter !== "all" || kategoriFilter !== "ALL"
               ? "Coba ubah filter untuk melihat data lainnya"
               : "Belum ada inspeksi yang disetujui"}
@@ -442,7 +515,7 @@ export default function RekapAccPage() {
                       {index + 1}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900">
-                      {new Date(item.approvedAtOperational).toLocaleDateString("id-ID", {
+                      {new Date(item.approvedAtOperational || item.approvedAtTraffic || item.tanggalInspeksi).toLocaleDateString("id-ID", {
                         day: "2-digit",
                         month: "long",
                         year: "numeric",
@@ -458,22 +531,34 @@ export default function RekapAccPage() {
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">
                       <div>{item.namaPetugas}</div>
-                      <div className="text-xs text-gray-500">NIP: {item.nipPetugas}</div>
+                      <div className="text-xs text-gray-700 font-medium">NIP: {item.nipPetugas}</div>
                     </td>
                     <td className="px-6 py-4 text-sm text-gray-900">
                       {item.namaPetugas2 ? (
                         <>
                           <div>{item.namaPetugas2}</div>
-                          <div className="text-xs text-gray-500">NIP: {item.nipPetugas2}</div>
+                          <div className="text-xs text-gray-700 font-medium">NIP: {item.nipPetugas2}</div>
                         </>
                       ) : (
-                        <span className="text-gray-400">-</span>
+                        <span className="text-gray-600 font-medium">-</span>
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center">
-                      <span className="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-lg bg-green-100 text-green-800">
-                        APPROVED
-                      </span>
+                      {item.status === 'APPROVED_BY_OPERATIONAL' ? (
+                        <span className="px-3 py-1 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-lg bg-green-100 text-green-800">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          FULLY APPROVED
+                        </span>
+                      ) : (
+                        <span className="px-3 py-1 inline-flex items-center gap-1 text-xs leading-5 font-semibold rounded-lg bg-blue-100 text-blue-800">
+                          <svg className="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+                          </svg>
+                          TRAFFIC
+                        </span>
+                      )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-center text-sm font-medium">
                       <div className="flex items-center justify-center gap-2">
@@ -482,11 +567,13 @@ export default function RekapAccPage() {
                             Detail
                           </button>
                         </Link>
-                        <Link href={`/dashboard/petugas-lapangan/inspeksi/${item.id}`}>
-                          <button className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 text-xs shadow-sm">
-                            Cetak PDF
-                          </button>
-                        </Link>
+                        <button
+                          data-pdf-id={item.id}
+                          onClick={() => handleDownloadPDF(item.id, item.nomorKendaraan)}
+                          className="px-3 py-1 bg-red-600 hover:bg-red-700 text-white rounded-lg transition-colors duration-200 text-xs shadow-sm"
+                        >
+                          Cetak PDF
+                        </button>
                       </div>
                     </td>
                   </tr>
@@ -502,12 +589,15 @@ export default function RekapAccPage() {
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
           <div className="bg-white rounded-lg shadow-xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
             <div className="sticky top-0 bg-white border-b border-gray-200 px-6 py-4 flex justify-between items-center">
-              <h3 className="text-xl font-bold text-gray-900">
-                📤 Kirim Rekap ke Manager
+              <h3 className="text-xl font-bold text-gray-900 flex items-center gap-2">
+                <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                </svg>
+                Kirim Rekap ke Manager
               </h3>
               <button
                 onClick={() => setShowSendModal(false)}
-                className="text-gray-400 hover:text-gray-600 text-2xl"
+                className="text-gray-600 hover:text-gray-900 text-2xl font-bold"
               >
                 ×
               </button>
@@ -543,24 +633,21 @@ export default function RekapAccPage() {
                   value={judulRekap}
                   onChange={(e) => setJudulRekap(e.target.value)}
                   placeholder="Contoh: Rekap Bulanan Oktober 2025"
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent placeholder:text-gray-700 placeholder:font-medium text-gray-900 font-medium"
                 />
               </div>
 
-              {/* Penerima */}
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Kirim ke Manager <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={receiverRole}
-                  onChange={(e) => setReceiverRole(e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
-                >
-                  <option value="BOTH">Kedua Manager (Traffic & Operational)</option>
-                  <option value="TRAFFIC">Manager Traffic Saja</option>
-                  <option value="OPERATIONAL">Manager Operational Saja</option>
-                </select>
+              {/* Info Penerima - Fixed to Manager Operational */}
+              <div className="bg-green-50 border border-green-200 rounded-lg p-4">
+                <p className="text-sm text-gray-700 font-medium flex items-center gap-2">
+                  <svg className="w-5 h-5 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                  </svg>
+                  <strong>Penerima:</strong> Manager Operational
+                </p>
+                <p className="text-xs text-gray-600 mt-1 ml-7">
+                  Rekap akan dikirim ke Manager Operational untuk review
+                </p>
               </div>
 
               {/* Catatan */}
@@ -573,7 +660,7 @@ export default function RekapAccPage() {
                   onChange={(e) => setCatatan(e.target.value)}
                   placeholder="Tambahkan catatan untuk manager..."
                   rows={4}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent resize-none"
+                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent resize-none placeholder:text-gray-700 placeholder:font-medium text-gray-900 font-medium"
                 />
               </div>
 
@@ -598,7 +685,10 @@ export default function RekapAccPage() {
                     </>
                   ) : (
                     <>
-                      📤 Kirim Rekap
+                      <svg className="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" />
+                      </svg>
+                      Kirim Rekap
                     </>
                   )}
                 </button>
@@ -607,6 +697,16 @@ export default function RekapAccPage() {
           </div>
         </div>
       )}
+
+      {/* Toast Notification */}
+      {toast && (
+        <ToastNotification
+          message={toast.message}
+          type={toast.type}
+          onClose={() => setToast(null)}
+        />
+      )}
     </div>
   );
 }
+

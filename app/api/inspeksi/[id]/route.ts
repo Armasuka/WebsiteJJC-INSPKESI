@@ -2,6 +2,11 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { PrismaClient } from "@prisma/client";
+import { 
+  sendEmail, 
+  emailTemplateApprovedTraffic, 
+  emailTemplateRejected 
+} from "@/lib/emailService";
 
 const prisma = new PrismaClient();
 
@@ -129,6 +134,46 @@ export async function PATCH(
         },
       });
       console.log("✅ Manager Traffic approval successful");
+
+      // 🔔 SEND EMAIL NOTIFICATION ke Manager Operational
+      if (process.env.EMAIL_ENABLED === "true") {
+        try {
+          const managerOperational = await prisma.user.findMany({
+            where: { role: "MANAGER_OPERATIONAL" },
+            select: { email: true, name: true },
+          });
+
+          console.log("📧 Sending email notifications to", managerOperational.length, "Manager Operational users");
+
+          for (const manager of managerOperational) {
+            const emailHtml = emailTemplateApprovedTraffic({
+              managerName: manager.name || "Manager",
+              kategoriKendaraan: updated.kategoriKendaraan,
+              nomorKendaraan: updated.nomorKendaraan,
+              namaPetugas: updated.namaPetugas,
+              tanggalInspeksi: new Date(updated.tanggalInspeksi).toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+                hour: "2-digit",
+                minute: "2-digit",
+              }),
+              inspeksiId: updated.id,
+            });
+
+            await sendEmail({
+              to: manager.email,
+              subject: `✅ Inspeksi Perlu Persetujuan: ${updated.kategoriKendaraan} - ${updated.nomorKendaraan}`,
+              html: emailHtml,
+            });
+          }
+
+          console.log("✅ Email notifications sent to Manager Operational");
+        } catch (emailError) {
+          console.error("❌ Error sending email:", emailError);
+        }
+      }
+
       return NextResponse.json({
         success: true,
         inspeksi: updated,
@@ -199,10 +244,116 @@ export async function PATCH(
           rejectedAt: new Date(),
         },
       });
+
+      // 🔔 SEND EMAIL NOTIFICATION ke Petugas
+      if (process.env.EMAIL_ENABLED === "true") {
+        try {
+          const petugas = await prisma.user.findUnique({
+            where: { id: inspeksi.petugasId },
+            select: { email: true, name: true },
+          });
+
+          if (petugas) {
+            const emailHtml = emailTemplateRejected({
+              petugasName: petugas.name || "Petugas",
+              petugasEmail: petugas.email,
+              kategoriKendaraan: updated.kategoriKendaraan,
+              nomorKendaraan: updated.nomorKendaraan,
+              rejectedBy: "TRAFFIC",
+              rejectionNote: updateData.rejectionNote || "Tidak ada catatan",
+              tanggalInspeksi: new Date(updated.tanggalInspeksi).toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              }),
+              inspeksiId: updated.id,
+            });
+
+            await sendEmail({
+              to: petugas.email,
+              subject: `❌ Laporan Ditolak: ${updated.kategoriKendaraan} - ${updated.nomorKendaraan}`,
+              html: emailHtml,
+            });
+
+            console.log("✅ Rejection email sent to petugas");
+          }
+        } catch (emailError) {
+          console.error("❌ Error sending rejection email:", emailError);
+        }
+      }
+
       return NextResponse.json({
         success: true,
         inspeksi: updated,
         message: "Inspeksi ditolak",
+      });
+    }
+
+    if (action === "reject_operational" && session.user.role === "MANAGER_OPERATIONAL") {
+      console.log("🚫 [API] Processing Manager Operational rejection...");
+      
+      // Pastikan sudah disetujui Manager Traffic dulu
+      if (inspeksi.status !== "APPROVED_BY_TRAFFIC") {
+        console.error("❌ [API] Cannot reject - not yet approved by Manager Traffic");
+        return NextResponse.json(
+          { error: "Inspeksi harus disetujui oleh Manager Traffic terlebih dahulu" },
+          { status: 400 }
+        );
+      }
+
+      console.log("✅ [API] Updating inspeksi to REJECTED...");
+      const updated = await prisma.inspeksi.update({
+        where: { id: params.id },
+        data: {
+          status: "REJECTED",
+          rejectionNote: updateData.rejectionNote,
+          rejectedBy: "OPERATIONAL",
+          rejectedAt: new Date(),
+        },
+      });
+      console.log("✅ [API] Manager Operational rejection successful");
+
+      // 🔔 SEND EMAIL NOTIFICATION ke Petugas
+      if (process.env.EMAIL_ENABLED === "true") {
+        try {
+          const petugas = await prisma.user.findUnique({
+            where: { id: inspeksi.petugasId },
+            select: { email: true, name: true },
+          });
+
+          if (petugas) {
+            const emailHtml = emailTemplateRejected({
+              petugasName: petugas.name || "Petugas",
+              petugasEmail: petugas.email,
+              kategoriKendaraan: updated.kategoriKendaraan,
+              nomorKendaraan: updated.nomorKendaraan,
+              rejectedBy: "OPERATIONAL",
+              rejectionNote: updateData.rejectionNote || "Tidak ada catatan",
+              tanggalInspeksi: new Date(updated.tanggalInspeksi).toLocaleDateString("id-ID", {
+                day: "numeric",
+                month: "long",
+                year: "numeric",
+              }),
+              inspeksiId: updated.id,
+            });
+
+            await sendEmail({
+              to: petugas.email,
+              subject: `❌ Laporan Ditolak: ${updated.kategoriKendaraan} - ${updated.nomorKendaraan}`,
+              html: emailHtml,
+            });
+
+            console.log("✅ Rejection email sent to petugas");
+          }
+        } catch (emailError) {
+          console.error("❌ Error sending rejection email:", emailError);
+        }
+      }
+
+      return NextResponse.json({
+        success: true,
+        inspeksi: updated,
+        message: "Inspeksi ditolak oleh Manager Operational",
       });
     }
 

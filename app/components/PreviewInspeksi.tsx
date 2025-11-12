@@ -1,13 +1,5 @@
 import React from 'react';
 
-interface Komentar {
-  id: string;
-  namaPengirim: string;
-  rolePengirim: string;
-  isiKomentar: string;
-  createdAt: string;
-}
-
 interface PreviewInspeksiProps {
   inspeksi: {
     id: string;
@@ -24,7 +16,6 @@ interface PreviewInspeksiProps {
     ttdManagerOperasional?: string | null;
     approvedAtTraffic?: string | null;
     approvedAtOperational?: string | null;
-    komentar?: Komentar[];
   };
 }
 
@@ -438,48 +429,7 @@ export default function PreviewInspeksi({ inspeksi }: PreviewInspeksiProps) {
           </div>
         </div>
 
-        {/* Section Komentar Manager */}
-        {inspeksi.komentar && inspeksi.komentar.length > 0 && (
-          <div className="border-t-2 border-black">
-            <div className="bg-gray-200 border-b-2 border-black p-2 font-bold text-sm uppercase text-black">
-              CATATAN / KOMENTAR MANAGER
-            </div>
-            <div className="p-4">
-              {inspeksi.komentar.map((komentar, index) => (
-                <div key={komentar.id} className={`mb-3 ${index !== inspeksi.komentar!.length - 1 ? 'border-b border-gray-300 pb-3' : ''}`}>
-                  <div className="flex items-start gap-2 mb-1">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold ${
-                      komentar.rolePengirim === 'MANAGER_TRAFFIC' 
-                        ? 'bg-blue-100 text-blue-800' 
-                        : komentar.rolePengirim === 'MANAGER_OPERATIONAL'
-                        ? 'bg-green-100 text-green-800'
-                        : 'bg-gray-100 text-gray-800'
-                    }`}>
-                      {komentar.rolePengirim === 'MANAGER_TRAFFIC' 
-                        ? '🔵 Manager Traffic' 
-                        : komentar.rolePengirim === 'MANAGER_OPERATIONAL'
-                        ? '🟢 Manager Operasional'
-                        : 'Petugas'}
-                    </span>
-                    <span className="text-xs font-medium text-gray-900">{komentar.namaPengirim}</span>
-                    <span className="text-xs text-gray-500 ml-auto">
-                      {new Date(komentar.createdAt).toLocaleString('id-ID', { 
-                        day: '2-digit', 
-                        month: 'short', 
-                        year: 'numeric', 
-                        hour: '2-digit', 
-                        minute: '2-digit' 
-                      })}
-                    </span>
-                  </div>
-                  <div className="text-sm text-gray-800 bg-gray-50 p-2 rounded border border-gray-200">
-                    {komentar.isiKomentar}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
+        {/* Section Komentar Manager - REMOVED: Komentar tidak ditampilkan di PDF/Print */}
       </div>
 
       {/* Halaman 2+ - Lampiran Foto Dokumen (Tanpa Border) */}

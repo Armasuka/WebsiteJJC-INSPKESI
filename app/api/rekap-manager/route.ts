@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { PrismaClient } from "@prisma/client";
+import { sendEmail, emailTemplateRekapManager } from "@/lib/emailService";
 
 const prisma = new PrismaClient();
 
@@ -72,7 +73,7 @@ export async function POST(req: NextRequest) {
       tanggalMulai,
       tanggalSelesai,
       kategoriKendaraan,
-      receiverRole, // "TRAFFIC" or "OPERATIONAL" or "BOTH"
+      receiverRole, // Will be ignored, always set to OPERATIONAL
       dataStatistik,
       catatan,
     } = body;
@@ -85,22 +86,42 @@ export async function POST(req: NextRequest) {
       );
     }
 
+    // Force receiverRole to OPERATIONAL only
+    const finalReceiverRole = "OPERATIONAL";
+
     // Count total inspeksi dalam periode
+    // Ambil semua yang sudah ter-ACC (minimal oleh Traffic)
     const whereClause: any = {
-      status: "APPROVED_BY_OPERATIONAL",
-      approvedAtOperational: {
-        gte: new Date(tanggalMulai),
-        lte: new Date(tanggalSelesai),
+      status: {
+        in: ["APPROVED_BY_TRAFFIC", "APPROVED_BY_OPERATIONAL"]
       },
+      OR: [
+        {
+          approvedAtTraffic: {
+            gte: new Date(tanggalMulai),
+            lte: new Date(new Date(tanggalSelesai).setHours(23, 59, 59, 999)),
+          },
+        },
+        {
+          approvedAtOperational: {
+            gte: new Date(tanggalMulai),
+            lte: new Date(new Date(tanggalSelesai).setHours(23, 59, 59, 999)),
+          },
+        }
+      ]
     };
 
     if (kategoriKendaraan && kategoriKendaraan !== "ALL") {
       whereClause.kategoriKendaraan = kategoriKendaraan;
     }
 
+    console.log("📊 Querying inspeksi with whereClause:", JSON.stringify(whereClause, null, 2));
+
     const totalInspeksi = await prisma.inspeksi.count({
       where: whereClause,
     });
+
+    console.log("📊 Total inspeksi found:", totalInspeksi);
 
     // Get breakdown per kategori
     const breakdown = await prisma.inspeksi.groupBy({
@@ -111,6 +132,8 @@ export async function POST(req: NextRequest) {
       },
     });
 
+    console.log("📊 Breakdown per kategori:", breakdown);
+
     const statistik = {
       totalInspeksi,
       breakdown: breakdown.map((item) => ({
@@ -120,10 +143,8 @@ export async function POST(req: NextRequest) {
       ...dataStatistik,
     };
 
-    // Determine which managers to send to
-    const receivers = receiverRole === "BOTH" 
-      ? ["TRAFFIC", "OPERATIONAL"] 
-      : [receiverRole];
+    // Determine which managers to send to - Always OPERATIONAL only
+    const receivers = ["OPERATIONAL"] as const;
 
     // Create rekap for each receiver
     const createdRekaps = await Promise.all(
@@ -138,13 +159,61 @@ export async function POST(req: NextRequest) {
             totalInspeksi,
             dataStatistik: statistik,
             pengirimId: session.user.id,
-            namaPengirim: session.user.name,
-            receiverRole: role,
+            namaPengirim: session.user.name || "Unknown",
+            receiverRole: "OPERATIONAL", // Always OPERATIONAL
             catatan,
           },
         })
       )
     );
+
+    // Send email notifications to managers
+    if (process.env.EMAIL_ENABLED === "true") {
+      for (const rekap of createdRekaps) {
+        try {
+          // Get manager email - always MANAGER_OPERATIONAL
+          const managers = await prisma.user.findMany({
+            where: { role: "MANAGER_OPERATIONAL" },
+            select: { email: true, name: true },
+          });
+
+          // Send email to all managers with this role
+          for (const manager of managers) {
+            const emailHtml = emailTemplateRekapManager({
+              managerName: manager.name || "Manager",
+              managerRole: rekap.receiverRole as 'TRAFFIC' | 'OPERATIONAL',
+              judulRekap: rekap.judulRekap,
+              periodeType: rekap.periodeType,
+              tanggalMulai: new Date(rekap.tanggalMulai).toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+              }),
+              tanggalSelesai: new Date(rekap.tanggalSelesai).toLocaleDateString('id-ID', {
+                day: '2-digit',
+                month: 'long',
+                year: 'numeric'
+              }),
+              kategoriKendaraan: rekap.kategoriKendaraan,
+              totalInspeksi: rekap.totalInspeksi,
+              namaPengirim: rekap.namaPengirim,
+              catatan: rekap.catatan || undefined,
+            });
+
+            await sendEmail({
+              to: manager.email,
+              subject: `📊 Laporan Rekap Inspeksi Baru - ${rekap.judulRekap}`,
+              html: emailHtml,
+            });
+
+            console.log(`✅ Email rekap sent to ${manager.email} (MANAGER_OPERATIONAL)`);
+          }
+        } catch (emailError) {
+          console.error("❌ Error sending rekap email:", emailError);
+          // Don't throw error, continue with response
+        }
+      }
+    }
 
     return NextResponse.json({
       success: true,

@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 import { PrismaClient } from "@prisma/client";
+import { sendEmail, emailTemplateInspeksiBaru } from "@/lib/emailService";
 
 const prisma = new PrismaClient();
 
@@ -151,6 +152,48 @@ export async function POST(request: Request) {
       },
     });
 
+    // 🔔 SEND EMAIL NOTIFICATION ke Manager Traffic jika status SUBMITTED
+    if (body.status === "SUBMITTED" && process.env.EMAIL_ENABLED === "true") {
+      try {
+        // Get all Manager Traffic users
+        const managerTraffic = await prisma.user.findMany({
+          where: { role: "MANAGER_TRAFFIC" },
+          select: { email: true, name: true },
+        });
+
+        console.log("📧 Sending email notifications to", managerTraffic.length, "Manager Traffic users");
+
+        // Send email to each Manager Traffic
+        for (const manager of managerTraffic) {
+          const emailHtml = emailTemplateInspeksiBaru({
+            managerName: manager.name || "Manager",
+            kategoriKendaraan: kategoriKendaraan,
+            nomorKendaraan: nomorKendaraan,
+            namaPetugas: namaPetugas,
+            tanggalInspeksi: new Date().toLocaleDateString("id-ID", {
+              day: "numeric",
+              month: "long",
+              year: "numeric",
+              hour: "2-digit",
+              minute: "2-digit",
+            }),
+            inspeksiId: inspeksi.id,
+          });
+
+          await sendEmail({
+            to: manager.email,
+            subject: `🚨 Inspeksi Baru: ${kategoriKendaraan} - ${nomorKendaraan}`,
+            html: emailHtml,
+          });
+        }
+
+        console.log("✅ Email notifications sent successfully");
+      } catch (emailError) {
+        console.error("❌ Error sending email notifications:", emailError);
+        // Don't fail the request if email fails
+      }
+    }
+
     return NextResponse.json({
       success: true,
       inspeksi,
@@ -225,11 +268,23 @@ export async function GET(request: Request) {
 
     // Filter by date range
     if (startDate && endDate) {
+      const start = new Date(startDate);
+      let end = new Date(endDate);
+      
+      // If endDate doesn't include time, set to end of day
+      if (!endDate.includes('T')) {
+        end = new Date(endDate + 'T23:59:59.999Z');
+      }
+      
+      console.log('[API INSPEKSI] Date filter:', { startDate: start, endDate: end });
+      
       where.tanggalInspeksi = {
-        gte: new Date(startDate),
-        lte: new Date(endDate + 'T23:59:59.999Z')
+        gte: start,
+        lte: end
       };
     }
+
+    console.log('[API INSPEKSI] Query where clause:', JSON.stringify(where, null, 2));
 
     // Optimasi: Select only necessary fields untuk list view
     const inspeksi = await prisma.inspeksi.findMany({
@@ -243,12 +298,18 @@ export async function GET(request: Request) {
         status: true,
         createdAt: true,
         updatedAt: true,
+        approvedByTraffic: true,
+        approvedByOperational: true,
         approvedAtTraffic: true,
         approvedAtOperational: true,
         ttdManagerTraffic: true,
         ttdManagerOperasional: true,
         rejectionNote: true,
         rejectedBy: true,
+        namaPetugas: true,
+        nipPetugas: true,
+        namaPetugas2: true,
+        nipPetugas2: true,
         dataKhusus: true,
         petugas: {
           select: {
@@ -267,6 +328,14 @@ export async function GET(request: Request) {
 
     // Get total count for pagination
     const total = await prisma.inspeksi.count({ where });
+
+    console.log('[API INSPEKSI] Results:', {
+      count: inspeksi.length,
+      total,
+      page,
+      limit,
+      petugasId: where.petugasId
+    });
 
     return NextResponse.json({
       data: inspeksi,
