@@ -67,11 +67,11 @@ export default function DetailInspeksi() {
 
   const getStatusBadge = (status: string) => {
     const statusConfig: Record<string, { label: string; className: string }> = {
-      DRAFT: { label: "💾 Draft", className: "bg-gray-100 text-gray-800 border-gray-300" },
-      SUBMITTED: { label: "⏳ Menunggu Manager Traffic", className: "bg-yellow-100 text-yellow-800 border-yellow-300" },
-      APPROVED_BY_TRAFFIC: { label: "🔵 Menunggu Manager Operasional", className: "bg-blue-100 text-blue-800 border-blue-300" },
-      APPROVED_BY_OPERATIONAL: { label: " APPROVED", className: "bg-green-100 text-green-800 border-green-300" },
-      REJECTED: { label: " DITOLAK", className: "bg-red-100 text-red-800 border-red-300" },
+      DRAFT: { label: "Draft", className: "bg-gray-100 text-gray-800 border-gray-300" },
+      SUBMITTED: { label: "Menunggu Manager Traffic", className: "bg-yellow-100 text-yellow-800 border-yellow-300" },
+      APPROVED_BY_TRAFFIC: { label: "Menunggu Manager Operasional", className: "bg-blue-100 text-blue-800 border-blue-300" },
+      APPROVED_BY_OPERATIONAL: { label: "APPROVED", className: "bg-green-100 text-green-800 border-green-300" },
+      REJECTED: { label: "DITOLAK", className: "bg-red-100 text-red-800 border-red-300" },
     };
 
     const config = statusConfig[status] || statusConfig.DRAFT;

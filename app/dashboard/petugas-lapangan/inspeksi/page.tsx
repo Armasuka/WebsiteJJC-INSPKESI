@@ -7,7 +7,11 @@ export default function PilihKategoriKendaraanPage() {
     {
       id: "PLAZA",
       name: "Plaza",
-      icon: "🏢",
+      icon: (
+        <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 2L2 7v10c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V7l-10-5zm0 11.99h7c-.53 4.12-3.28 7.79-7 8.94V12H5V7.3l7-3.11v8.8z"/>
+        </svg>
+      ),
       description: "Kendaraan Operasional",
       color: "from-blue-50 to-blue-100",
       borderColor: "border-blue-200",
@@ -17,7 +21,11 @@ export default function PilihKategoriKendaraanPage() {
     {
       id: "DEREK",
       name: "Derek",
-      icon: "🚚",
+      icon: (
+        <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M18 18.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zm1.5-9H17V12h4.46L19.5 9.5zM6 18.5c-.83 0-1.5.67-1.5 1.5s.67 1.5 1.5 1.5 1.5-.67 1.5-1.5-.67-1.5-1.5-1.5zM20 8l3 4v5h-2c0 1.66-1.34 3-3 3s-3-1.34-3-3H9c0 1.66-1.34 3-3 3s-3-1.34-3-3H1V6c0-1.11.89-2 2-2h14v4h3zM8 6H4v7h4V6z"/>
+        </svg>
+      ),
       description: "Kendaraan Evakuasi",
       color: "from-yellow-50 to-yellow-100",
       borderColor: "border-yellow-200",
@@ -27,7 +35,11 @@ export default function PilihKategoriKendaraanPage() {
     {
       id: "KAMTIB",
       name: "Kamtib",
-      icon: "🛡️",
+      icon: (
+        <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4zm-2 16l-4-4 1.41-1.41L10 14.17l6.59-6.59L18 9l-8 8z"/>
+        </svg>
+      ),
       description: "Kendaraan Keamanan",
       color: "from-green-50 to-green-100",
       borderColor: "border-green-200",
@@ -37,7 +49,11 @@ export default function PilihKategoriKendaraanPage() {
     {
       id: "RESCUE",
       name: "Rescue",
-      icon: "🚒",
+      icon: (
+        <svg className="w-16 h-16 mx-auto" fill="currentColor" viewBox="0 0 24 24">
+          <path d="M18.92 6.01C18.72 5.42 18.16 5 17.5 5h-11c-.66 0-1.21.42-1.42 1.01L3 12v8c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-1h12v1c0 .55.45 1 1 1h1c.55 0 1-.45 1-1v-8l-2.08-5.99zM6.5 16c-.83 0-1.5-.67-1.5-1.5S5.67 13 6.5 13s1.5.67 1.5 1.5S7.33 16 6.5 16zm11 0c-.83 0-1.5-.67-1.5-1.5s.67-1.5 1.5-1.5 1.5.67 1.5 1.5-.67 1.5-1.5 1.5zM5 11l1.5-4.5h11L19 11H5z"/>
+        </svg>
+      ),
       description: "Kendaraan Penyelamatan",
       color: "from-orange-50 to-orange-100",
       borderColor: "border-orange-200",
@@ -81,7 +97,9 @@ export default function PilihKategoriKendaraanPage() {
 
       <div className="bg-blue-50 border-l-4 border-blue-700 p-3 sm:p-4 rounded">
         <h4 className="font-bold text-blue-800 mb-2 flex items-center gap-2 text-sm sm:text-base">
-          <span>ℹ️</span>
+          <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+            <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clipRule="evenodd"/>
+          </svg>
           <span>Informasi</span>
         </h4>
         <p className="text-xs sm:text-sm text-blue-700 mb-2">

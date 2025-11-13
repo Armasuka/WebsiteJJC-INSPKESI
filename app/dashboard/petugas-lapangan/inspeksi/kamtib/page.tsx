@@ -613,8 +613,11 @@ export default function InspeksiKamtibPage() {
       </div>
 
       <div className="flex justify-end">
-        <button type="button" onClick={nextStep} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">
-          Lanjut ke Kelengkapan Sarana ?
+        <button type="button" onClick={nextStep} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition flex items-center gap-2">
+          Lanjut ke Kelengkapan Sarana
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
         </button>
       </div>
     </div>
@@ -710,7 +713,12 @@ export default function InspeksiKamtibPage() {
 
       <div className="flex justify-between">
         <button type="button" onClick={prevStep} className="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition">Kembali</button>
-        <button type="button" onClick={nextStep} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">Lanjut ke Dokumen</button>
+        <button type="button" onClick={nextStep} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition flex items-center gap-2">
+          Lanjut ke Dokumen
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </button>
       </div>
     </div>
   );
@@ -884,7 +892,12 @@ export default function InspeksiKamtibPage() {
 
       <div className="flex justify-between">
         <button type="button" onClick={prevStep} className="px-8 py-3 bg-gray-500 hover:bg-gray-600 text-white rounded-lg font-medium transition">Kembali</button>
-        <button type="button" onClick={nextStep} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition">Lanjut ke Tanda Tangan</button>
+        <button type="button" onClick={nextStep} className="px-8 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg font-medium transition flex items-center gap-2">
+          Lanjut ke Tanda Tangan
+          <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
+          </svg>
+        </button>
       </div>
     </div>
   );
@@ -1375,7 +1388,7 @@ export default function InspeksiKamtibPage() {
           <div className="flex items-center justify-between">
             {[1, 2, 3, 4].map((step) => (
               <div key={step} className="flex items-center">
-                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition ${currentStep === step ? "bg-indigo-600 text-white" : currentStep > step ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"}`}>{currentStep > step ? "?" : step}</div>
+                <div className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition ${currentStep === step ? "bg-indigo-600 text-white" : currentStep > step ? "bg-green-500 text-white" : "bg-gray-200 text-gray-500"}`}>{currentStep > step ? "✓" : step}</div>
                 {step < 4 && <div className={`w-16 md:w-32 h-1 mx-2 transition ${currentStep > step ? "bg-green-500" : "bg-gray-200"}`} />}
               </div>
             ))}
