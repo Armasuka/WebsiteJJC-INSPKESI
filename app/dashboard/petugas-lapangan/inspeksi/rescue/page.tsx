@@ -868,11 +868,11 @@ export default function InspeksiRescuePage() {
                   <div className="col-span-5 p-2 border-r border-black text-black">{item}</div>
                   <div className="col-span-2 border-r border-black">
                     <div className="grid grid-cols-2 h-full">
-                      <div className="p-2 text-center border-r border-black flex items-center justify-center text-black">
-                        {data?.ada ? "✓" : ""}
+                      <div className="p-2 text-center border-r border-black flex items-center justify-center text-green-600 font-bold text-lg">
+                        {data?.ada ? "✔" : ""}
                       </div>
-                      <div className="p-2 text-center flex items-center justify-center text-black">
-                        {!data?.ada ? "✓" : ""}
+                      <div className="p-2 text-center flex items-center justify-center text-red-600 font-bold text-lg">
+                        {!data?.ada ? "✔" : ""}
                       </div>
                     </div>
                   </div>
@@ -881,14 +881,14 @@ export default function InspeksiRescuePage() {
                   </div>
                   <div className="col-span-3">
                     <div className="grid grid-cols-3 h-full text-center">
-                      <div className="p-2 border-r border-black flex items-center justify-center text-black">
-                        {data?.ada && data?.kondisi === "BAIK" ? "✓" : ""}
+                      <div className="p-2 border-r border-black flex items-center justify-center text-green-600 font-bold text-lg">
+                        {data?.ada && data?.kondisi === "BAIK" ? "✔" : ""}
                       </div>
-                      <div className="p-2 border-r border-black flex items-center justify-center text-black">
-                        {data?.ada && data?.kondisi === "RUSAK_RINGAN" ? "✓" : ""}
+                      <div className="p-2 border-r border-black flex items-center justify-center text-yellow-600 font-bold text-lg">
+                        {data?.ada && data?.kondisi === "RUSAK_RINGAN" ? "✔" : ""}
                       </div>
-                      <div className="p-2 flex items-center justify-center text-black">
-                        {data?.ada && data?.kondisi === "RUSAK_BERAT" ? "✓" : ""}
+                      <div className="p-2 flex items-center justify-center text-red-600 font-bold text-lg">
+                        {data?.ada && data?.kondisi === "RUSAK_BERAT" ? "✔" : ""}
                       </div>
                     </div>
                   </div>
@@ -908,11 +908,11 @@ export default function InspeksiRescuePage() {
                   <div className="col-span-5 p-2 border-r border-black text-black">{item}</div>
                   <div className="col-span-2 border-r border-black">
                     <div className="grid grid-cols-2 h-full">
-                      <div className="p-2 text-center border-r border-black flex items-center justify-center text-black">
-                        {data?.ada ? "✓" : ""}
+                      <div className="p-2 text-center border-r border-black flex items-center justify-center text-green-600 font-bold text-lg">
+                        {data?.ada ? "✔" : ""}
                       </div>
-                      <div className="p-2 text-center flex items-center justify-center text-black">
-                        {!data?.ada ? "✓" : ""}
+                      <div className="p-2 text-center flex items-center justify-center text-red-600 font-bold text-lg">
+                        {!data?.ada ? "✔" : ""}
                       </div>
                     </div>
                   </div>
@@ -921,14 +921,14 @@ export default function InspeksiRescuePage() {
                   </div>
                   <div className="col-span-3">
                     <div className="grid grid-cols-3 h-full text-center">
-                      <div className="p-2 border-r border-black flex items-center justify-center text-black">
-                        {data?.ada && data?.kondisi === "BAIK" ? "✓" : ""}
+                      <div className="p-2 border-r border-black flex items-center justify-center text-green-600 font-bold text-lg">
+                        {data?.ada && data?.kondisi === "BAIK" ? "✔" : ""}
                       </div>
-                      <div className="p-2 border-r border-black flex items-center justify-center text-black">
-                        {data?.ada && data?.kondisi === "RUSAK_RINGAN" ? "✓" : ""}
+                      <div className="p-2 border-r border-black flex items-center justify-center text-yellow-600 font-bold text-lg">
+                        {data?.ada && data?.kondisi === "RUSAK_RINGAN" ? "✔" : ""}
                       </div>
-                      <div className="p-2 flex items-center justify-center text-black">
-                        {data?.ada && data?.kondisi === "RUSAK_BERAT" ? "✓" : ""}
+                      <div className="p-2 flex items-center justify-center text-red-600 font-bold text-lg">
+                        {data?.ada && data?.kondisi === "RUSAK_BERAT" ? "✔" : ""}
                       </div>
                     </div>
                   </div>
